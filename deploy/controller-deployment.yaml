@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: project-matrix-controller
+  namespace: matrix-system
+  labels:
+    app.kubernetes.io/name: project-matrix-controller
+    app.kubernetes.io/part-of: project-matrix
+    project-matrix.redhat.com/component: controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: project-matrix-controller
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: project-matrix-controller
+        app.kubernetes.io/part-of: project-matrix
+        project-matrix.redhat.com/component: controller
+    spec:
+      serviceAccountName: project-matrix-controller
+      automountServiceAccountToken: true
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: controller
+        image: image-registry.openshift-image-registry.svc:5000/project-matrix-build/project-matrix-controller@sha256:69e155c8cb25eb5bbf5025894a9b525958a13bb36add05ff72a28fc45b3da5f8
+        imagePullPolicy: IfNotPresent
+        command: ["/usr/local/bin/project-matrix-controller"]
+        args: ["--leader-elect=true"]
+        env:
+        - name: GATEKEEPER_EXECUTOR_IMAGE
+          valueFrom:
+            configMapKeyRef:
+              name: project-matrix-controller-config
+              key: GATEKEEPER_EXECUTOR_IMAGE
+        ports:
+        - name: metrics
+          containerPort: 8080
+        - name: health
+          containerPort: 8081
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: health
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: health
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+          readOnlyRootFilesystem: true

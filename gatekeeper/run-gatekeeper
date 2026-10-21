@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# Container entrypoint for the Gatekeeper Kubernetes Job.
+# The original gatekeeper.sh remains the source of truth for the workflow; this
+# wrapper only publishes its inspectable output to a cluster-side ConfigMap.
+set -uo pipefail
+
+run_upstream_preview() {
+  local base_domain gateway_host
+  base_domain="$(oc get dns cluster -o jsonpath='{.spec.baseDomain}' 2>/dev/null || true)"
+  if [[ -z "${MCP_GATEWAY_HOST:-}" && -n "${base_domain}" ]]; then
+    MCP_GATEWAY_HOST="mcp-gateway-preview.apps.${base_domain}"
+  fi
+  gateway_host="${MCP_GATEWAY_HOST:-mcp-gateway-preview.apps.invalid}"
+
+  export MCP_GATEWAY_NAMESPACE="${MCP_GATEWAY_NAMESPACE:-mcp-gateway-preview}"
+  export GATEWAY_NAMESPACE="${GATEWAY_NAMESPACE:-mcp-gateway-preview}"
+  export GATEWAY_NAME="${GATEWAY_NAME:-mcp-gateway-preview}"
+  export GATEWAY_CLASS_NAME="${GATEWAY_CLASS_NAME:-openshift-default}"
+  export MCP_GATEWAY_HOST="${gateway_host}"
+  export GATEKEEPER_MCP_URL="${GATEKEEPER_MCP_URL:-https://${gateway_host}/mcp}"
+  # The preview host is already covered by the OpenShift *.apps wildcard and
+  # is exposed through an edge Route. Do not ask the ingress DNS operator to
+  # publish a second record for that wildcard-owned hostname.
+  export GATEKEEPER_MANAGE_GATEWAY_DNS=0
+  export GATEKEEPER_MANAGE_GATEWAY_TLS=1
+
+  GATEKEEPER_CONFIRM_UPSTREAM_PREVIEW=1 \
+    bash /opt/project-matrix/gatekeeper/preview/install-upstream.sh || return $?
+
+  GATEKEEPER_MCP_URL="${GATEKEEPER_MCP_URL}" \
+    bash /opt/project-matrix/gatekeeper/gatekeeper.sh --profile innovation all
+}
+
+publish_evidence() {
+  local root="${GATEKEEPER_RUN_ROOT:-/var/lib/project-matrix/runs}"
+  local namespace="${PROJECT_MATRIX_EVIDENCE_NAMESPACE:-${POD_NAMESPACE:-}}"
+  local configmap="${PROJECT_MATRIX_EVIDENCE_CONFIGMAP:-}"
+  local run_dir
+
+  [[ -n "${namespace}" && -n "${configmap}" ]] || return 0
+  [[ -x "$(command -v oc 2>/dev/null || true)" ]] || return 0
+  run_dir="$(find "${root}" -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null | sort | tail -1)"
+  [[ -n "${run_dir}" && -d "${run_dir}" ]] || return 0
+
+  local -a files=("${run_dir}/report.md" "${run_dir}/status.env")
+  [[ -f "${run_dir}/cluster-diagnostics.txt" ]] && files+=("${run_dir}/cluster-diagnostics.txt")
+  oc create configmap "${configmap}" -n "${namespace}" \
+    "${files[@]/#/--from-file=}" \
+    --dry-run=client -o yaml 2>/dev/null |
+    oc apply -f - >/dev/null 2>&1 || return 0
+  oc label configmap "${configmap}" -n "${namespace}" \
+    "project-matrix.redhat.com/evidence=true" \
+    "project-matrix.redhat.com/layer-deployment=${PROJECT_MATRIX_LAYER_DEPLOYMENT:-unknown}" \
+    --overwrite >/dev/null 2>&1 || true
+}
+
+if [[ "${1:-}" == "preview-install" ]]; then
+  shift
+  run_upstream_preview "$@"
+  gatekeeper_exit=$?
+else
+  if GATEKEEPER_ROOT=/opt/project-matrix \
+    GATEKEEPER_RUN_ROOT="${GATEKEEPER_RUN_ROOT:-/var/lib/project-matrix/runs}" \
+    bash /opt/project-matrix/gatekeeper/gatekeeper.sh "$@"; then
+    gatekeeper_exit=0
+  else
+    gatekeeper_exit=$?
+  fi
+fi
+
+publish_evidence
+exit "${gatekeeper_exit}"

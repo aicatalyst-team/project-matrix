@@ -1,0 +1,35 @@
+# Project Matrix dashboard BFF plus its already-built federated remote.
+# The frontend must be built in a compatible OpenShift AI Dashboard workspace
+# first; this image packages the resulting static assets with the BFF.
+# Build from the Project Matrix root:
+#   podman build -f ui/Containerfile.release -t <registry>/project-matrix/dashboard:<tag> .
+ARG GO_BUILDER_IMAGE=registry.access.redhat.com/ubi9/go-toolset:1.25
+ARG RUNTIME_IMAGE=registry.access.redhat.com/ubi9/ubi-minimal:latest
+ARG STATIC_DIR=ui/frontend/dist
+
+FROM ${GO_BUILDER_IMAGE} AS bff-builder
+
+WORKDIR /src
+COPY controller/go.mod controller/go.sum ./controller/
+RUN cd controller && go mod download
+COPY controller/ ./controller/
+RUN cd controller && \
+    CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" \
+      -o /tmp/project-matrix-bff ./cmd/bff
+
+FROM ${RUNTIME_IMAGE}
+
+ARG STATIC_DIR
+WORKDIR /opt/project-matrix
+COPY --from=bff-builder /tmp/project-matrix-bff /usr/local/bin/project-matrix-bff
+COPY ${STATIC_DIR}/ /opt/project-matrix/static/
+
+ENV BFF_BIND_ADDRESS=:8082 \
+    BFF_STATIC_DIR=/opt/project-matrix/static \
+    BFF_NAMESPACE=matrix-system \
+    BFF_NAME=gatekeeper \
+    BFF_USER_HEADER=Authorization
+
+USER 65532:65532
+EXPOSE 8082
+ENTRYPOINT ["/usr/local/bin/project-matrix-bff"]

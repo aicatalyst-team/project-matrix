@@ -1,0 +1,30 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: project-matrix-dashboard-host
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+    project-matrix.redhat.com/component: dashboard-host-build
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: project-matrix-dashboard-host
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+    project-matrix.redhat.com/component: dashboard-host-build
+spec:
+  runPolicy: SerialLatestOnly
+  source:
+    type: Binary
+  strategy:
+    type: Docker
+    dockerStrategy:
+      buildArgs:
+        - name: BUILD_MODE
+          value: RHOAI
+  output:
+    to:
+      kind: ImageStreamTag
+      name: project-matrix-dashboard-host:20261021-matrix
+  triggers: []

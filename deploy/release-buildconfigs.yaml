@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: project-matrix-build
+  labels:
+    project-matrix.redhat.com/managed: "true"
+    project-matrix.redhat.com/purpose: release-builds
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: project-matrix-controller
+  namespace: project-matrix-build
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: project-matrix-gatekeeper
+  namespace: project-matrix-build
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: project-matrix-dashboard
+  namespace: project-matrix-build
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: project-matrix-controller
+  namespace: project-matrix-build
+spec:
+  runPolicy: SerialLatestOnly
+  source:
+    type: Binary
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: controller/Containerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: project-matrix-controller:20261021-matrix
+  triggers: []
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: project-matrix-gatekeeper
+  namespace: project-matrix-build
+spec:
+  runPolicy: SerialLatestOnly
+  source:
+    type: Binary
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: gatekeeper/Containerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: project-matrix-gatekeeper:20261021-matrix
+  triggers: []
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: project-matrix-dashboard
+  namespace: project-matrix-build
+spec:
+  runPolicy: SerialLatestOnly
+  source:
+    type: Binary
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: ui/Containerfile.release
+  output:
+    to:
+      kind: ImageStreamTag
+      name: project-matrix-dashboard:20261021-matrix
+  triggers: []

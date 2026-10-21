@@ -1,0 +1,52 @@
+# Project Matrix: Gatekeeper Gateway-layer platform prerequisite.
+#
+# This is intentionally NOT applied by gatekeeper.sh. AdminNetworkPolicy is a
+# cluster-scoped administrative control. Apply it only after the platform
+# owner approves the exact MemPalace isolation boundary on the target cluster.
+#
+# The MCP Lifecycle Operator currently reconciles a permissive namespaced
+# NetworkPolicy for MCPServer/mempalace. Ordinary NetworkPolicies are additive
+# and cannot override that rule. This policy makes the intended L4 boundary
+# explicit: only the MCP Gateway namespace may reach the MemPalace backend on
+# TCP/8000; all other in-cluster pod sources are denied.
+apiVersion: policy.networking.k8s.io/v1alpha1
+kind: AdminNetworkPolicy
+metadata:
+  name: project-matrix-gatekeeper-mempalace-ingress
+  labels:
+    project-matrix.redhat.com/component: gatekeeper
+    project-matrix.redhat.com/managed: "reviewed-platform-prerequisite"
+  annotations:
+    project-matrix.redhat.com/apply-mode: platform-admin-approved-only
+    project-matrix.redhat.com/rationale: operator-generated-mcpserver-policy-is-permissive
+spec:
+  # This target cluster's OVN-Kubernetes implementation accepts priorities
+  # 0-99; 50 leaves room for a higher-precedence platform emergency policy.
+  priority: 50
+  subject:
+    pods:
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: mempalace
+      podSelector:
+        matchLabels:
+          mcp-server: mempalace
+  ingress:
+    - name: allow-mcp-gateway
+      action: Allow
+      from:
+        - namespaces:
+            matchLabels:
+              kubernetes.io/metadata.name: mcp-gateway-system
+      ports:
+        - portNumber:
+            port: 8000
+            protocol: TCP
+    - name: deny-all-other-pod-sources
+      action: Deny
+      from:
+        - namespaces: {}
+      ports:
+        - portNumber:
+            port: 8000
+            protocol: TCP

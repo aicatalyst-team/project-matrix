@@ -1,0 +1,31 @@
+# Project Matrix: Gatekeeper executor image.
+# Build from the Project Matrix root. The selected Aramco troubleshooting
+# assets are vendored under gatekeeper/vendor with their provenance documented.
+FROM registry.redhat.io/openshift4/ose-cli-rhel9:v4.21 AS oc
+FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
+
+ARG HELM_VERSION=3.19.0
+ARG HELM_SHA256=a7f81ce08007091b86d8bd696eb4d86b8d0f2e1b9f6c714be62f82f96a594496
+
+USER 0
+COPY --from=oc /usr/bin/oc /usr/local/bin/oc
+RUN microdnf install -y ca-certificates gzip jq python3.12 tar \
+    && curl -fsSL "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" -o /tmp/helm.tgz \
+    && echo "${HELM_SHA256}  /tmp/helm.tgz" | sha256sum -c - \
+    && tar -xzf /tmp/helm.tgz -C /tmp \
+    && install -m 0755 /tmp/linux-amd64/helm /usr/local/bin/helm \
+    && rm -rf /tmp/helm.tgz /tmp/linux-amd64 \
+    && microdnf clean all \
+    && rm -rf /var/cache/yum /var/cache/dnf
+
+WORKDIR /opt/project-matrix
+COPY gatekeeper /opt/project-matrix/gatekeeper
+
+RUN install -d -m 0775 /opt/project-matrix/bin /var/lib/project-matrix/runs \
+    && chgrp -R 0 /opt/project-matrix /var/lib/project-matrix \
+    && chmod -R g=u /opt/project-matrix /var/lib/project-matrix
+COPY gatekeeper/run-gatekeeper /opt/project-matrix/bin/run-gatekeeper
+RUN chmod 0755 /opt/project-matrix/bin/run-gatekeeper
+
+USER 1001
+ENTRYPOINT ["/opt/project-matrix/bin/run-gatekeeper"]

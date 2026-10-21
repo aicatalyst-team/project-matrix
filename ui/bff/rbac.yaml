@@ -1,0 +1,43 @@
+# The dashboard BFF has the smallest possible Project Matrix authority. It can
+# only read and apply the platform-owned Gatekeeper intent in matrix-system.
+# It cannot create Jobs, patch operators, alter Gateway API resources, or run
+# customer workflow scripts.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: project-matrix-dashboard-bff
+  namespace: matrix-system
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+    project-matrix.redhat.com/component: dashboard-bff
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: project-matrix-dashboard-bff
+  namespace: matrix-system
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+    project-matrix.redhat.com/component: dashboard-bff
+rules:
+- apiGroups: ["project-matrix.redhat.com"]
+  resources: ["layerdeployments"]
+  verbs: ["get", "create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: project-matrix-dashboard-bff
+  namespace: matrix-system
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+    project-matrix.redhat.com/component: dashboard-bff
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: project-matrix-dashboard-bff
+subjects:
+- kind: ServiceAccount
+  name: project-matrix-dashboard-bff
+  namespace: matrix-system
+

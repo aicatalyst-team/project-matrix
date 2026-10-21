@@ -1,0 +1,13 @@
+# Project Matrix release images are built from the repository root. Keep the
+# binary build context small and prevent unrelated source from entering an
+# image build. The Dashboard host has its own .dockerignore in its repository.
+.git
+.github
+evidence
+upstream
+ui/frontend/node_modules
+ui/frontend/src
+ui/frontend/.cache
+**/__pycache__
+**/.pytest_cache
+**/.DS_Store

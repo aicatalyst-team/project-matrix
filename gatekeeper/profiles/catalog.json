@@ -1,0 +1,178 @@
+{
+  "apiVersion": "project-matrix.redhat.com/v1alpha1",
+  "kind": "GatekeeperProfileCatalog",
+  "catalogVersion": "2026-10-19",
+  "layer": "Gateway",
+  "codeName": "Gatekeeper",
+  "supportEvidence": [
+    {
+      "component": "MCP Gateway Operator",
+      "installedVersion": "0.7.1",
+      "installedChannel": "preview",
+      "supportTier": "Technology Preview",
+      "productionDecision": "blocking",
+      "reason": "The target OpenShift AI 3.5 release documentation identifies the MCP Gateway Operator as an optional external Technology Preview prerequisite.",
+      "source": "https://docs.redhat.com/de/documentation/red_hat_openshift_ai_self-managed/3.5/html/release_notes/technology-preview-features_relnotes"
+    },
+    {
+      "component": "Gateway AuthPolicy",
+      "installedVersion": "MCP Gateway Operator 0.7.1 / RHCL 1.4.2",
+      "supportTier": "Compatibility gate",
+      "productionDecision": "blocking",
+      "reason": "The OpenShift TokenReview AuthPolicy path returns the required 401 challenge and supports authenticated MCP traffic. Native OIDC now has a compatible unauthenticated challenge after Authorino TLS bootstrap, but positive authenticated OIDC and internal mcps-listener authorization remain qualification gates.",
+      "source": "https://docs.kuadrant.io/latest/kuadrant-operator/doc/reference/authpolicy/"
+    },
+    {
+      "component": "Upstream MCP Gateway preview",
+      "installedVersion": "1.0.2",
+      "installedChannel": "upstream-pinned",
+      "supportTier": "Innovation preview",
+      "productionDecision": "not-supported",
+      "reason": "The sole Gatekeeper preview lane is pinned to upstream v1.0.2. The upstream OpenShift deployment requires RHCL 1.5.0 or newer and is isolated from the Red Hat OLM-managed production baseline.",
+      "source": "https://github.com/Kuadrant/mcp-gateway/releases/tag/v1.0.2"
+    }
+  ],
+  "upgradePolicy": {
+    "currentInstanceFirst": true,
+    "operatorUpgradeOwnership": "OpenShift and OpenShift AI/OLM own platform upgrades; Gatekeeper observes and revalidates",
+    "gatekeeperMayApproveInstallPlans": false,
+    "gatekeeperMayMutateSubscriptions": false,
+    "preUpgradeCommand": "gatekeeper.sh upgrade-preflight",
+    "postUpgradeCommand": "gatekeeper.sh upgrade-postcheck",
+    "requiredPostUpgradeEvidence": [
+      "OpenShift version and update channel",
+      "OpenShift AI Subscription, approval mode, CSV, and DataScienceCluster readiness",
+      "Gateway/MCP/Kuadrant/Service Mesh operator versions and CRD served/storage versions",
+      "Gateway Accepted and Programmed",
+      "DNS Published and HTTPS listener",
+      "effective backend isolation and direct-bypass denial",
+      "OIDC challenge and authenticated MCP protocol behavior"
+    ],
+    "noUpgradeDecision": "A supported current baseline is valid even when a newer manual-approval InstallPlan is available; unsupported or unsafe combinations remain blocked."
+  },
+  "supportExceptionPolicy": {
+    "fileVariable": "GATEKEEPER_SUPPORT_EXCEPTION_FILE",
+    "requiredFields": ["component", "installedVersion", "installedChannel", "approvalRef", "approvedBy", "scope", "expiresAt"],
+    "matchingRule": "The exception must match the live MCP Gateway Operator version and OLM channel.",
+    "boundary": "An exception records governance acceptance; it does not convert Technology Preview into Red Hat-supported software or remove AuthPolicy/protocol gates."
+  },
+  "releaseContract": "gatekeeper/releases/mcp-gateway.json",
+  "sources": [
+    {
+      "id": "gateway-use-cases",
+      "repository": "https://github.com/jcordes73/openshift-ai-gateway-use-cases",
+      "role": "reference-fixtures",
+      "ownership": "Project Matrix must normalize and pin selected resources before execution."
+    },
+    {
+      "id": "rhoai-customer-workflows-aramock",
+      "repository": "https://gitlab.com/redhat/rhel-ai/workflow-validation/rhoai-customer-workflows",
+      "path": "scripts/cluster-management/aramock",
+      "revision": "e39026a31c8a41bf77edaa7b4a900326fddb7ef7",
+      "role": "fixture-and-conformance-source",
+      "upstreamOwner": "Red Hat RHEL AI workflow-validation / Aramock team",
+      "integrationMode": "pinned-reference-until-shared-contract",
+      "ownership": "Project Matrix reuses classified fixtures and checks; it does not invoke the full bootstrap as a Gateway install."
+    },
+    {
+      "id": "saudi-aramco-mcp-lifecycle",
+      "repository": "local Project Matrix workspace",
+      "path": "aramco-mcp-lifecycle",
+      "role": "inspectable-evaluation-and-troubleshooting",
+      "ownership": "The same validation assets remain downloadable and runnable outside the UI."
+    },
+    {
+      "id": "mcp-gateway-upstream-v1.0.2",
+      "repository": "https://github.com/Kuadrant/mcp-gateway",
+      "revision": "e48ae51cfa52a57f93f334bdadbe8ce58ef5a9f6",
+      "role": "sole-preview-runtime-and-contract",
+      "ownership": "Project Matrix pins and isolates the upstream preview; Red Hat OLM remains the production/support baseline."
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "gateway.mcp-edge",
+      "strategyLayer": "Gateway",
+      "scope": "namespaced-and-gateway-api",
+      "sourceIds": ["gateway-use-cases", "saudi-aramco-mcp-lifecycle"],
+      "evidence": ["Gateway Accepted/Programmed", "HTTPRoute status", "MCP registration status", "authenticated protocol smoke test"],
+      "blockedMutations": ["cluster-wide operator installation", "unowned Gateway replacement"]
+    },
+    {
+      "id": "gateway.maas-control-plane",
+      "strategyLayer": "Gateway",
+      "scope": "OpenShift AI control-plane",
+      "sourceIds": ["gateway-use-cases", "rhoai-customer-workflows-aramock"],
+      "evidence": ["DataScienceCluster readiness", "MaaS Gateway readiness", "MaaS model publication", "MaaS subscription readiness"],
+      "blockedMutations": ["destructive MaaS reset", "unowned Gateway or DNSRecord mutation"]
+    },
+    {
+      "id": "gateway.auth-policy",
+      "strategyLayer": "Gateway",
+      "scope": "namespaced policy plus customer identity",
+      "sourceIds": ["gateway-use-cases", "rhoai-customer-workflows-aramock"],
+      "evidence": ["OpenShift TokenReview", "OIDC discovery when selected", "Authorino trust", "group-scoped authorization", "service-account authorization"],
+      "blockedMutations": ["OpenShift OAuth identity-provider mutation", "embedded customer credentials"]
+    },
+    {
+      "id": "gateway.external-model",
+      "strategyLayer": "Gateway",
+      "scope": "namespaced ExternalModel resources",
+      "sourceIds": ["gateway-use-cases", "rhoai-customer-workflows-aramock"],
+      "evidence": ["ExternalProvider readiness", "ExternalModel readiness", "MaaSModelRef resolution", "authenticated inference"],
+      "blockedMutations": ["MaaS endpoint loops", "untrusted endpoint registration"]
+    },
+    {
+      "id": "bastion.oidc-fixture",
+      "strategyLayer": "Secure Agent Onboarding",
+      "scope": "optional namespaced identity fixture",
+      "sourceIds": ["rhoai-customer-workflows-aramock"],
+      "evidence": ["issuer discovery", "token claims", "Authorino trust"],
+      "blockedMutations": ["mandatory third-party identity installation"]
+    },
+    {
+      "id": "ember-flux.evaluation-backend",
+      "strategyLayer": "vLLM (Core) + llm-d",
+      "scope": "optional namespaced evaluation backend",
+      "sourceIds": ["rhoai-customer-workflows-aramock"],
+      "evidence": ["LLMInferenceService readiness", "MaaSModelRef resolution", "inference response"],
+      "blockedMutations": ["GPU MachineSet provisioning from the Gateway click", "unbounded model image pulls"]
+    },
+    {
+      "id": "lens.maas-telemetry",
+      "strategyLayer": "AgentOps",
+      "scope": "MaaS telemetry and Prometheus",
+      "sourceIds": ["rhoai-customer-workflows-aramock"],
+      "evidence": ["usage metrics", "model request metrics", "dashboard observability"],
+      "blockedMutations": ["unapproved shared observability reconfiguration"]
+    }
+  ],
+  "profiles": [
+    {
+      "name": "gateway-production",
+      "mode": "Production",
+      "lane": "production",
+      "supportBoundary": "Production candidate: only release-gated and customer-supported capabilities may pass.",
+      "requiredCapabilityIds": ["gateway.mcp-edge", "gateway.maas-control-plane", "gateway.auth-policy"],
+      "optionalCapabilityIds": ["gateway.external-model", "lens.maas-telemetry"],
+      "requiredSources": ["gateway-use-cases", "saudi-aramco-mcp-lifecycle"],
+      "previewAllowed": false,
+      "clusterWideMutationsAllowed": false,
+      "gpuProvisioningAllowed": false
+    },
+    {
+      "name": "gateway-evaluation",
+      "mode": "Preview",
+      "lane": "innovation",
+      "supportBoundary": "Innovation lane: one authoritative pinned upstream MCP Gateway preview; Red Hat OLM Technology Preview remains a compatibility baseline and is not an alternate preview implementation.",
+      "requiredCapabilityIds": ["gateway.mcp-edge", "gateway.maas-control-plane"],
+      "optionalCapabilityIds": ["gateway.auth-policy", "gateway.external-model", "bastion.oidc-fixture", "ember-flux.evaluation-backend", "lens.maas-telemetry"],
+      "requiredSources": ["gateway-use-cases", "rhoai-customer-workflows-aramock", "saudi-aramco-mcp-lifecycle", "mcp-gateway-upstream-v1.0.2"],
+      "previewAllowed": true,
+      "previewSource": "upstream",
+      "previewReleaseContract": "gatekeeper/releases/mcp-gateway.json",
+      "clusterWideMutationsAllowed": false,
+      "gpuProvisioningAllowed": false
+    }
+  ]
+}

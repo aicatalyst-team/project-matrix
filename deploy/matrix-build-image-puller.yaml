@@ -1,0 +1,22 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: project-matrix-runtime-image-puller
+  namespace: project-matrix-build
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+    project-matrix.redhat.com/component: runtime-image-access
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:image-puller
+subjects:
+- kind: ServiceAccount
+  name: project-matrix-controller
+  namespace: matrix-system
+- kind: ServiceAccount
+  name: project-matrix-dashboard-bff
+  namespace: matrix-system
+- kind: ServiceAccount
+  name: project-matrix-gatekeeper-runner
+  namespace: matrix-system

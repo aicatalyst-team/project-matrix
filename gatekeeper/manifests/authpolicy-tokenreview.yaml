@@ -1,0 +1,33 @@
+# Project Matrix: Gatekeeper — Red Hat/OpenShift-native Gateway authentication.
+#
+# This policy uses the OpenShift Kubernetes TokenReview API. It avoids making
+# an external customer OIDC provider a prerequisite for the Gateway layer's
+# one-click evaluation path. Native OIDC remains an explicit alternate mode.
+apiVersion: kuadrant.io/v1
+kind: AuthPolicy
+metadata:
+  name: mcp-auth-policy
+  namespace: mcp-gateway-system
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: mcp-gateway
+    sectionName: mcp
+  defaults:
+    when:
+      - predicate: "!request.path.contains('/.well-known')"
+    rules:
+      authentication:
+        openshift-oauth:
+          kubernetesTokenReview:
+            audiences:
+              - https://kubernetes.default.svc
+      response:
+        unauthenticated:
+          code: 401
+          headers:
+            WWW-Authenticate:
+              value: Bearer
+          body:
+            value: '{"error":"Unauthorized","message":"Authentication required."}'

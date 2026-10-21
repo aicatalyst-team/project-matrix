@@ -1,0 +1,52 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: project-matrix-controller
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+rules:
+- apiGroups: ["project-matrix.redhat.com"]
+  resources: ["layerdeployments"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["project-matrix.redhat.com"]
+  resources: ["layerdeployments/status"]
+  verbs: ["get", "update", "patch"]
+- apiGroups: ["project-matrix.redhat.com"]
+  resources: ["layerdeployments/finalizers"]
+  verbs: ["update", "patch"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch"]
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "watch", "create", "delete"]
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: project-matrix-controller
+  namespace: matrix-system
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+    project-matrix.redhat.com/component: controller
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: project-matrix-controller
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: project-matrix-controller
+subjects:
+- kind: ServiceAccount
+  name: project-matrix-controller
+  namespace: matrix-system

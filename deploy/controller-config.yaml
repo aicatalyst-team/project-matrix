@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: project-matrix-controller-config
+  namespace: matrix-system
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+    project-matrix.redhat.com/component: controller
+data:
+  # Target-cluster validation build. Canonical Quay promotion records the same
+  # image content under the external release lock before customer shipment.
+  GATEKEEPER_EXECUTOR_IMAGE: "image-registry.openshift-image-registry.svc:5000/project-matrix-build/project-matrix-gatekeeper@sha256:4bd8096ed342d353cce15ae04b38a68f60480714f35fe015dbcf25948a5d7411"

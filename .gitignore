@@ -1,0 +1,16 @@
+ui/frontend/node_modules/
+ui/frontend/dist/
+.DS_Store
+.idea/
+.vscode/
+.env
+.env.*
+!.env.example
+**/node_modules/
+**/dist/
+**/build/
+**/.cache/
+**/*.log
+.gatekeeper-runs/
+upstream/
+evidence/generated/

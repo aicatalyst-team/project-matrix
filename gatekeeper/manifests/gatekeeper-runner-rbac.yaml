@@ -1,0 +1,298 @@
+# Reviewed runner permissions for the Gatekeeper executor Job.
+#
+# This is intentionally separate from the Project Matrix controller RBAC. The
+# runner executes customer-selected validation and configuration actions; its
+# permissions must be reviewed and approved by the platform administrator.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: project-matrix-gatekeeper-runner
+  namespace: matrix-system
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+    project-matrix.redhat.com/layer: gateway
+    project-matrix.redhat.com/code-name: gatekeeper
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: project-matrix-gatekeeper-observer
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+rules:
+- apiGroups: [""]
+  resources: ["namespaces", "pods", "events"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["config.openshift.io"]
+  resources: ["clusteroperators"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["config.openshift.io"]
+  resources: ["clusterversions"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["dsc.opendatahub.io"]
+  resources: ["datascienceclusters"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["datasciencecluster.opendatahub.io"]
+  resources: ["datascienceclusters"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["gateway.networking.k8s.io"]
+  resources: ["gateways", "httproutes"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["gateway.networking.k8s.io"]
+  resources: ["gatewayclasses"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["mcp.kuadrant.io"]
+  resources: ["mcpserverregistrations"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["operators.coreos.com"]
+  resources: ["clusterserviceversions", "subscriptions", "installplans"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["policy.networking.k8s.io"]
+  resources: ["adminnetworkpolicies"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: project-matrix-gatekeeper-observer
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: project-matrix-gatekeeper-observer
+subjects:
+- kind: ServiceAccount
+  name: project-matrix-gatekeeper-runner
+  namespace: matrix-system
+---
+# The upstream preview is intentionally namespaced. Helm only needs release
+# metadata, while the executor needs the exact Gateway/extension and Route it
+# owns in this isolated namespace.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: project-matrix-gatekeeper-preview-installer
+  namespace: mcp-gateway-preview
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "create", "update", "patch"]
+- apiGroups: ["gateway.networking.k8s.io"]
+  resources: ["gateways"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+- apiGroups: ["mcp.kuadrant.io"]
+  resources: ["mcpgatewayextensions"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+- apiGroups: ["route.openshift.io"]
+  resources: ["routes"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: project-matrix-gatekeeper-preview-installer
+  namespace: mcp-gateway-preview
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: project-matrix-gatekeeper-preview-installer
+subjects:
+- kind: ServiceAccount
+  name: project-matrix-gatekeeper-runner
+  namespace: matrix-system
+---
+# Gatekeeper applies this policy after the isolated Gateway exists. It remains
+# namespaced and does not grant access to arbitrary customer namespaces.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: project-matrix-gatekeeper-preview-authpolicy
+  namespace: mcp-gateway-preview
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+rules:
+- apiGroups: ["kuadrant.io"]
+  resources: ["authpolicies"]
+  verbs: ["get", "list", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: project-matrix-gatekeeper-preview-authpolicy
+  namespace: mcp-gateway-preview
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: project-matrix-gatekeeper-preview-authpolicy
+subjects:
+- kind: ServiceAccount
+  name: project-matrix-gatekeeper-runner
+  namespace: matrix-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: project-matrix-gatekeeper-evidence-writer
+  namespace: matrix-system
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: project-matrix-gatekeeper-evidence-writer
+  namespace: matrix-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: project-matrix-gatekeeper-evidence-writer
+subjects:
+- kind: ServiceAccount
+  name: project-matrix-gatekeeper-runner
+  namespace: matrix-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: project-matrix-gatekeeper-networkpolicy-writer
+  namespace: mempalace
+rules:
+- apiGroups: ["networking.k8s.io"]
+  resources: ["networkpolicies"]
+  verbs: ["get", "list", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: project-matrix-gatekeeper-networkpolicy-writer
+  namespace: mempalace
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: project-matrix-gatekeeper-networkpolicy-writer
+subjects:
+- kind: ServiceAccount
+  name: project-matrix-gatekeeper-runner
+  namespace: matrix-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: project-matrix-gatekeeper-authpolicy-writer
+  namespace: mcp-gateway-system
+rules:
+- apiGroups: ["kuadrant.io"]
+  resources: ["authpolicies"]
+  verbs: ["get", "list", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: project-matrix-gatekeeper-authpolicy-writer
+  namespace: mcp-gateway-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: project-matrix-gatekeeper-authpolicy-writer
+subjects:
+- kind: ServiceAccount
+  name: project-matrix-gatekeeper-runner
+  namespace: matrix-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: project-matrix-gatekeeper-gateway-writer
+  namespace: mcp-gateway-system
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+rules:
+- apiGroups: ["gateway.networking.k8s.io"]
+  resources: ["gateways", "referencegrants"]
+  verbs: ["get", "list", "patch", "update", "create"]
+- apiGroups: ["route.openshift.io"]
+  resources: ["routes"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+- apiGroups: ["networking.istio.io"]
+  resources: ["envoyfilters"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: project-matrix-gatekeeper-gateway-writer
+  namespace: mcp-gateway-system
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: project-matrix-gatekeeper-gateway-writer
+subjects:
+- kind: ServiceAccount
+  name: project-matrix-gatekeeper-runner
+  namespace: matrix-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: project-matrix-gatekeeper-dns-writer
+  namespace: openshift-ingress-operator
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+rules:
+- apiGroups: ["ingress.operator.openshift.io"]
+  resources: ["dnsrecords"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: project-matrix-gatekeeper-dns-writer
+  namespace: openshift-ingress-operator
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: project-matrix-gatekeeper-dns-writer
+subjects:
+- kind: ServiceAccount
+  name: project-matrix-gatekeeper-runner
+  namespace: matrix-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: project-matrix-gatekeeper-bypass-probe
+  namespace: default
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "create", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: project-matrix-gatekeeper-bypass-probe
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: project-matrix-gatekeeper-bypass-probe
+subjects:
+- kind: ServiceAccount
+  name: project-matrix-gatekeeper-runner
+  namespace: matrix-system

@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: project-matrix-dashboard-bff
+  namespace: matrix-system
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+    project-matrix.redhat.com/component: dashboard-bff
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: project-matrix-dashboard-bff
+  namespace: matrix-system
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+rules:
+- apiGroups: ["project-matrix.redhat.com"]
+  resources: ["layerdeployments"]
+  verbs: ["get", "create", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: project-matrix-dashboard-bff
+  namespace: matrix-system
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: project-matrix-dashboard-bff
+subjects:
+- kind: ServiceAccount
+  name: project-matrix-dashboard-bff
+  namespace: matrix-system

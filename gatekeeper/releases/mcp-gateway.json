@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "project-matrix.mcp-gateway-release/v1alpha1",
+  "previewLane": {
+    "source": "upstream",
+    "repository": "https://github.com/Kuadrant/mcp-gateway",
+    "version": "1.0.2",
+    "gitRef": "v1.0.2",
+    "commit": "e48ae51cfa52a57f93f334bdadbe8ce58ef5a9f6",
+    "released": "2026-10-16",
+    "chart": "oci://ghcr.io/kuadrant/charts/mcp-gateway",
+    "chartVersion": "1.0.2",
+    "chartDigest": "sha256:97be2a4ba4daae5b5a8470074c414a94c02689d3e9c3910eaa098f6044e42eb3",
+    "requiredConnectivityLink": ">=1.5.0",
+    "supportBoundary": "Upstream innovation preview; not a Red Hat-supported production release",
+    "deploymentMode": "isolated-namespaced-chart",
+    "immutableReferenceRequired": true
+  },
+  "redHatBaseline": {
+    "source": "red-hat-olm",
+    "package": "mcp-gateway",
+    "channel": "preview",
+    "supportBoundary": "Red Hat Technology Preview",
+    "upgradeOwner": "Red Hat Connectivity Link / OpenShift AI OLM"
+  },
+  "promotionRule": "The preview lane may move forward only by changing the pinned upstream version and commit together; it must not silently fall back to the Red Hat OLM preview package."
+}

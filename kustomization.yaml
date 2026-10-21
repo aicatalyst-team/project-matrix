@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deploy/layerdeployment-crd.yaml
+- gatekeeper/manifests
+- deploy/controller-rbac.yaml
+- deploy/dashboard-bff-rbac.yaml
+- deploy/controller-config.yaml
+- deploy/controller-deployment.yaml
+- deploy/dashboard-bff-deployment.yaml
+- deploy/matrix-build-image-puller.yaml
+
+labels:
+- pairs:
+    app.kubernetes.io/part-of: project-matrix
+  includeSelectors: false

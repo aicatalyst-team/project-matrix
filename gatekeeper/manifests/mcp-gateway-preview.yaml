@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mcp-gateway-preview
+  labels:
+    app.kubernetes.io/part-of: project-matrix
+    project-matrix.redhat.com/layer: gateway
+    project-matrix.redhat.com/code-name: gatekeeper
+    project-matrix.redhat.com/lane: preview

@@ -1,0 +1,36 @@
+{
+  "private": true,
+  "name": "@odh-dashboard/project-matrix",
+  "description": "Project Matrix horizontal one-click deployment extension for OpenShift AI.",
+  "version": "0.0.0",
+  "exports": {
+    "./extensions": "./extensions.ts"
+  },
+  "module-federation": {
+    "name": "projectMatrix",
+    "remoteEntry": "/remoteEntry.js",
+    "authorize": true,
+    "tls": false,
+    "proxy": [
+      {
+        "path": "/project-matrix/api",
+        "pathRewrite": "/api"
+      }
+    ],
+    "local": {
+      "host": "localhost",
+      "port": 9109
+    },
+    "service": {
+      "name": "project-matrix-dashboard-bff",
+      "namespace": "matrix-system",
+      "port": 8082
+    }
+  },
+  "dependencies": {
+    "@odh-dashboard/internal": "*",
+    "@odh-dashboard/plugin-core": "*",
+    "mod-arch-core": "^1.2.0"
+  }
+}
+

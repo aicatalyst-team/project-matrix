@@ -1,0 +1,139 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: layerdeployments.project-matrix.redhat.com
+spec:
+  group: project-matrix.redhat.com
+  scope: Namespaced
+  names:
+    plural: layerdeployments
+    singular: layerdeployment
+    kind: LayerDeployment
+    shortNames:
+      - ld
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Layer
+          type: string
+          jsonPath: .spec.layer
+        - name: Mode
+          type: string
+          jsonPath: .spec.mode
+        - name: Desired
+          type: string
+          jsonPath: .spec.desiredState
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          type: object
+          required:
+            - spec
+          properties:
+            spec:
+              type: object
+              required:
+                - layer
+                - codeName
+                - mode
+                - desiredState
+              properties:
+                layer:
+                  type: string
+                  description: "Canonical Red Hat AI: Agentic Strategy layer."
+                  enum:
+                    - Infrastructure
+                    - vLLM (Core)
+                    - llm-d
+                    - OGX
+                    - Gateway
+                    - Secure Agent Onboarding
+                    - AgentOps
+                    - BYOA
+                codeName:
+                  type: string
+                  description: Project Matrix internal layer code name.
+                mode:
+                  type: string
+                  description: Active operating mode for the same-instance deployment.
+                  enum:
+                    - Production
+                    - Preview
+                desiredState:
+                  type: string
+                  enum:
+                    - Enabled
+                    - Disabled
+                profile:
+                  type: string
+                  description: Opinionated layer profile selected by the platform team.
+                coexistence:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                      default: true
+                    retainInactiveLane:
+                      type: boolean
+                      default: true
+                customerProfile:
+                  type: string
+                  description: Named evaluation profile, not a free-form installer.
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                  enum:
+                    - Pending
+                    - Preflighting
+                    - Installing
+                    - Configuring
+                    - Validating
+                    - Evaluating
+                    - Ready
+                    - Degraded
+                    - Blocked
+                    - Disabled
+                activeMode:
+                  type: string
+                  enum:
+                    - Production
+                    - Preview
+                    - Unknown
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - type
+                      - status
+                    properties:
+                      type:
+                        type: string
+                      status:
+                        type: string
+                        enum:
+                          - True
+                          - False
+                          - Unknown
+                      reason:
+                        type: string
+                      message:
+                        type: string
+                      lastTransitionTime:
+                        type: string
+                        format: date-time
+                evidenceRef:
+                  type: string
+                supportBoundary:
+                  type: string

@@ -1,0 +1,18 @@
+apiVersion: project-matrix.redhat.com/v1alpha1
+kind: LayerDeployment
+metadata:
+  name: gatekeeper
+  namespace: matrix-system
+  labels:
+    project-matrix.redhat.com/layer: gateway
+    project-matrix.redhat.com/code-name: gatekeeper
+spec:
+  layer: Gateway
+  codeName: Gatekeeper
+  mode: Preview
+  desiredState: Enabled
+  profile: gateway-evaluation
+  customerProfile: saudi-aramco-gateway-evaluation
+  coexistence:
+    enabled: true
+    retainInactiveLane: true

@@ -1,0 +1,104 @@
+# =============================================================================
+# Gap 2 fix — ensure the MCP Gateway cannot be bypassed (backstop, not a substitute)
+# =============================================================================
+# The MCP Gateway is an L7 component: it does federation, per-tool authz, OIDC
+# termination and protocol-aware routing. It does NOT (and cannot) govern L3/L4
+# reachability between pods. This NetworkPolicy is the "dumb backstop" that makes
+# the gateway's rich L7 policy MANDATORY in the path rather than optional for an
+# in-cluster actor. See hardening/README.md ("What's the point of the gateway").
+#
+# Effect: only pods in the mcp-gateway-system namespace may reach the MemPalace
+# backend on :8000. Everything else is denied. The MCP Lifecycle Operator labels
+# the live backend with `mcp-server=mempalace`; selecting `app=mempalace` would
+# silently match zero Pods and leave the operator's permissive policy in force.
+#
+# NOTE: OpenShift's default OVN-Kubernetes network plugin enforces NetworkPolicy.
+# A namespace with NO ingress NetworkPolicy allows all ingress; adding this policy
+# switches the selected pods to default-deny + the explicit allow below.
+#
+# The MCP Lifecycle Operator also creates a NetworkPolicy named `mempalace`.
+# NetworkPolicies are additive, so a second restrictive policy cannot override
+# an operator-created allow-all policy. The first document below deliberately
+# reconciles that generated policy to the same gateway-only rule. The operator
+# may restore its default on a later reconciliation; Gatekeeper validation detects
+# that drift and reports the bypass rather than claiming success.
+# =============================================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mempalace
+  namespace: mempalace
+spec:
+  podSelector:
+    matchLabels:
+      mcp-server: mempalace
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: mcp-gateway-system
+      ports:
+        - protocol: TCP
+          port: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mempalace-allow-gateway-only
+  namespace: mempalace
+spec:
+  podSelector:
+    matchLabels:
+      mcp-server: mempalace   # MCP Lifecycle Operator label on backend pods
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              # Every namespace carries this immutable label set by Kubernetes.
+              kubernetes.io/metadata.name: mcp-gateway-system
+      ports:
+        - protocol: TCP
+          port: 8000
+---
+# Policy for the operator-independent StatefulSet fallback. It uses the
+# `app=mempalace` label and is intentionally separate because NetworkPolicy
+# selectors do not support OR across two label sets.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mempalace-statefulset-allow-gateway-only
+  namespace: mempalace
+spec:
+  podSelector:
+    matchLabels:
+      app: mempalace
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: mcp-gateway-system
+      ports:
+        - protocol: TCP
+          port: 8000
+---
+# Optional mesh-layer alternative / complement (RHCL rides Istio):
+# PeerAuthentication STRICT + an AuthorizationPolicy achieve the same guarantee
+# with mTLS identity instead of namespace selectors. Uncomment if using OSSM.
+#
+# apiVersion: security.istio.io/v1
+# kind: PeerAuthentication
+# metadata:
+#   name: mempalace-mtls-strict
+#   namespace: mempalace
+# spec:
+#   selector:
+#     matchLabels:
+#       app: mempalace
+#   mtls:
+#     mode: STRICT
