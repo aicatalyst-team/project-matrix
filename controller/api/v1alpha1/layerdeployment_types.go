@@ -21,11 +21,28 @@ type CoexistenceSpec struct {
 }
 
 type LayerDeploymentStatus struct {
-	Phase           string             `json:"phase,omitempty"`
-	ActiveMode      string             `json:"activeMode,omitempty"`
-	Conditions      []metav1.Condition `json:"conditions,omitempty"`
-	EvidenceRef     string             `json:"evidenceRef,omitempty"`
-	SupportBoundary string             `json:"supportBoundary,omitempty"`
+	Phase           string                 `json:"phase,omitempty"`
+	CurrentStep     string                 `json:"currentStep,omitempty"`
+	ActiveMode      string                 `json:"activeMode,omitempty"`
+	Conditions      []metav1.Condition     `json:"conditions,omitempty"`
+	EvidenceRef     string                 `json:"evidenceRef,omitempty"`
+	SupportBoundary string                 `json:"supportBoundary,omitempty"`
+	Components      []LayerComponentStatus `json:"components,omitempty"`
+	DemoUseCases    []DemoUseCaseStatus    `json:"demoUseCases,omitempty"`
+}
+
+type LayerComponentStatus struct {
+	Name   string `json:"name"`
+	Status string `json:"status"`
+	Detail string `json:"detail"`
+}
+
+type DemoUseCaseStatus struct {
+	Name        string `json:"name"`
+	Status      string `json:"status"`
+	Detail      string `json:"detail"`
+	ActionLabel string `json:"actionLabel,omitempty"`
+	ActionHref  string `json:"actionHref,omitempty"`
 }
 
 type LayerDeployment struct {
@@ -57,6 +74,12 @@ func (in *LayerDeployment) DeepCopyInto(out *LayerDeployment) {
 	out.Status = in.Status
 	if in.Status.Conditions != nil {
 		out.Status.Conditions = append([]metav1.Condition(nil), in.Status.Conditions...)
+	}
+	if in.Status.Components != nil {
+		out.Status.Components = append([]LayerComponentStatus(nil), in.Status.Components...)
+	}
+	if in.Status.DemoUseCases != nil {
+		out.Status.DemoUseCases = append([]DemoUseCaseStatus(nil), in.Status.DemoUseCases...)
 	}
 }
 

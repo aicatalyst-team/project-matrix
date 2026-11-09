@@ -27,7 +27,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: controller
-        image: image-registry.openshift-image-registry.svc:5000/project-matrix-build/project-matrix-controller@sha256:69e155c8cb25eb5bbf5025894a9b525958a13bb36add05ff72a28fc45b3da5f8
+        image: image-registry.openshift-image-registry.svc:5000/project-matrix-build/project-matrix-controller@sha256:64195518ca33fe6f0d02a6ad3d272cd19b30639067f67e672ed063332457cabd
         imagePullPolicy: IfNotPresent
         command: ["/usr/local/bin/project-matrix-controller"]
         args: ["--leader-elect=true"]

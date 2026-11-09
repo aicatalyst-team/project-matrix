@@ -75,10 +75,15 @@ func (r *LayerDeploymentReconciler) Reconcile(ctx context.Context, request recon
 	original := deployment.DeepCopy()
 	deployment.Status = matrixv1alpha1.LayerDeploymentStatus{
 		Phase:           computed.Phase,
+		CurrentStep:     computed.CurrentStep,
 		ActiveMode:      computed.ActiveMode,
 		Conditions:      preserveTransitionTimes(original.Status.Conditions, computed.Conditions),
 		EvidenceRef:     evidenceRef,
 		SupportBoundary: computed.SupportBoundary,
+	}
+	if deployment.Spec.Layer == "Gateway" {
+		deployment.Status.Components = gatewayComponents(computed.Phase)
+		deployment.Status.DemoUseCases = gatewayDemoUseCases(computed.Phase)
 	}
 	if !reflect.DeepEqual(original.Status, deployment.Status) {
 		if err := r.Status().Patch(ctx, &deployment, client.MergeFrom(original)); err != nil {
@@ -136,7 +141,8 @@ func executionState(computed plan.Plan, job *batchv1.Job, created bool) plan.Pla
 	if job.Status.Succeeded > 0 {
 		computed.Execution = "job-succeeded"
 		computed.Phase = "Ready"
-		computed.Message = "Gatekeeper execution Job completed successfully; validation evidence is available from the Job run."
+		computed.CurrentStep = "MCP Gateway capability ready; remaining Gateway-layer gates are available for validation"
+		computed.Message = "The MCP-first capability is ready. MaaS, identity/exposure, routing, quota, and conformance remain explicit Gateway-layer validation gates."
 		setCondition(&computed, plan.ConditionAdapterReady, metav1.ConditionTrue, "JobSucceeded", computed.Message)
 		setCondition(&computed, plan.ConditionReady, metav1.ConditionTrue, "JobSucceeded", computed.Message)
 		return computed
@@ -144,14 +150,55 @@ func executionState(computed plan.Plan, job *batchv1.Job, created bool) plan.Pla
 	if job.Status.Failed > 0 {
 		computed.Execution = "job-failed"
 		computed.Phase = "Degraded"
+		computed.CurrentStep = "Gateway layer blocked by a dependency or validation gate"
 		computed.Message = "Gatekeeper execution Job failed; inspect the Job logs and diagnostics before retrying."
 		setCondition(&computed, plan.ConditionAdapterReady, metav1.ConditionFalse, "JobFailed", computed.Message)
 		setCondition(&computed, plan.ConditionReady, metav1.ConditionFalse, "JobFailed", computed.Message)
 		return computed
 	}
+	if computed.Mode == plan.Preview {
+		computed.CurrentStep = "Installing the isolated upstream Gateway, then validating it"
+	} else {
+		computed.CurrentStep = "Checking Red Hat-supported Gateway prerequisites"
+	}
 	setCondition(&computed, plan.ConditionAdapterReady, metav1.ConditionFalse, "JobRunning", "Gatekeeper execution Job exists and has not completed.")
 	setCondition(&computed, plan.ConditionReady, metav1.ConditionFalse, "JobRunning", "The Gateway layer is not Ready until the Gatekeeper execution Job completes.")
 	return computed
+}
+
+func gatewayComponents(phase string) []matrixv1alpha1.LayerComponentStatus {
+	status := "Not installed"
+	if phase == "Installing" || phase == "Preflighting" {
+		status = "Installing"
+	}
+	components := []matrixv1alpha1.LayerComponentStatus{
+		{Name: "MCP Gateway", Status: status, Detail: "Federates MCP servers through the selected Gateway lane."},
+		{Name: "MaaS Gateway", Status: "Not checked", Detail: "Provides the governed model-response path for the Gateway-layer round trip."},
+		{Name: "Identity and exposure", Status: "Not checked", Detail: "Validates authentication, TLS, listener exposure, and the customer access boundary."},
+		{Name: "Routing, quotas, and conformance", Status: "Not checked", Detail: "Proves request routing, limits, status reporting, and end-to-end behavior."},
+	}
+	if phase == "Ready" {
+		components[0].Status = "Healthy"
+		for index := 1; index < len(components); index++ {
+			components[index].Status = "Validation gate"
+		}
+	}
+	if phase == "Degraded" || phase == "Blocked" {
+		components[0].Status = "Not installed"
+	}
+	return components
+}
+
+func gatewayDemoUseCases(phase string) []matrixv1alpha1.DemoUseCaseStatus {
+	firstStatus := "Not checked"
+	if phase == "Installing" || phase == "Preflighting" {
+		firstStatus = "Installing"
+	}
+	return []matrixv1alpha1.DemoUseCaseStatus{
+		{Name: "Authenticated MCP tool federation", Status: firstStatus, Detail: "Demonstrate initialize, tools/list, and an approved non-destructive tools/call through MCP Gateway.", ActionLabel: "Go to MCP catalog", ActionHref: "/ai-hub/mcp-servers/catalog"},
+		{Name: "Governed model response through MaaS", Status: "Validation gate", Detail: "Connect an agent workflow to MaaS and show the governed model response as the Gateway-layer round trip."},
+		{Name: "Policy and exposure troubleshooting", Status: "Not checked", Detail: "Use the generated evidence to explain identity, TLS, routing, quota, and conformance behavior without hidden assumptions."},
+	}
 }
 
 func setCondition(computed *plan.Plan, conditionType string, status metav1.ConditionStatus, reason, message string) {

@@ -79,6 +79,35 @@ Apply the package as a platform administrator. The dashboard BFF has only
 controller has only the API permissions needed to reconcile LayerDeployment
 status, plan ConfigMaps, Gatekeeper Jobs, and leader-election leases.
 
+### One-time evaluator authorization
+
+The AI Hub MCP installer performs a SubjectAccessReview for the browser user
+before it starts an install. The user must have namespace-scoped access to
+create MCPServer resources in the selected Gateway project; `kube:admin` CLI
+access does not transfer to the browser OAuth session. The shipped package
+creates the Role but deliberately does not guess a customer identity.
+
+Bind it to the customer's evaluator group (recommended):
+
+```bash
+bash ./deploy/grant-gateway-evaluator-access.sh \
+  --namespace mcp-gateway-preview \
+  --group project-matrix-gateway-evaluators
+```
+
+For a controlled evaluation account, bind the same Role to one user:
+
+```bash
+bash ./deploy/grant-gateway-evaluator-access.sh \
+  --namespace mcp-gateway-preview \
+  --user <openshift-user>
+```
+
+This grants only `get`, `list`, `create`, `patch`, and `delete` on
+`mcpservers.mcp.x-k8s.io` in that namespace. It does not grant cluster-admin,
+operator, Gateway API, or platform-upgrade permissions. The installer remains
+portable because the namespace and identity are explicit deployment inputs.
+
 ## Verify
 
 Run the read-only baseline check before any installation attempt:

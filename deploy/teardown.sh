@@ -48,6 +48,8 @@ if [[ "${remove_dashboard_auth_evaluation}" == "1" ]]; then
   oc delete service/project-matrix-dashboard-eval-auth-upstream \
     networkpolicy/project-matrix-dashboard-eval-auth-upstream \
     -n redhat-ods-applications --ignore-not-found=true
+  oc delete configmap/project-matrix-dashboard-eval-federation \
+    -n redhat-ods-applications --ignore-not-found=true
 fi
 
 if [[ "${remove_dashboard_evaluation}" == "1" ]]; then

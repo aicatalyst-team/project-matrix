@@ -16,6 +16,22 @@ export type LayerDeploymentCondition = {
   lastTransitionTime?: string;
 };
 
+export type GatewayCapabilityStatus = 'Installing' | 'Healthy' | 'Validation gate' | 'Not installed' | 'Not checked';
+
+export type GatewayComponent = {
+  name: string;
+  status: GatewayCapabilityStatus;
+  detail: string;
+};
+
+export type GatewayDemoUseCase = {
+  name: string;
+  status: GatewayCapabilityStatus;
+  detail: string;
+  actionLabel?: string;
+  actionHref?: string;
+};
+
 export type LayerDeployment = {
   apiVersion: 'project-matrix.redhat.com/v1alpha1';
   kind: 'LayerDeployment';
@@ -38,10 +54,13 @@ export type LayerDeployment = {
   };
   status?: {
     phase?: string;
+    currentStep?: string;
     activeMode?: DeploymentMode | 'Unknown';
     conditions?: LayerDeploymentCondition[];
     evidenceRef?: string;
     supportBoundary?: string;
+    components?: GatewayComponent[];
+    demoUseCases?: GatewayDemoUseCase[];
   };
 };
 

@@ -27,7 +27,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: dashboard-bff
-        image: image-registry.openshift-image-registry.svc:5000/project-matrix-build/project-matrix-dashboard@sha256:b1ed7635dc3d6b920014a3a2e8ebbce9d924f7426459514ecce6626b98bfa63c
+        image: image-registry.openshift-image-registry.svc:5000/project-matrix-build/project-matrix-dashboard@sha256:ae40b0d64b15d6f377fe3687b58223338a4d6ae87bf40024e1f0e2020e73945d
         imagePullPolicy: IfNotPresent
         ports:
         - name: http

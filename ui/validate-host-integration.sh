@@ -91,8 +91,8 @@ for (const required of [
 for (const required of [
   "const PROJECT_MATRIX = 'projectMatrix'",
   'id: PROJECT_MATRIX',
-  "title: 'Agentic Platform'",
-  "title: 'Red Hat AI: Agentic Strategy'",
+  "title: 'AI Stack'",
+  "title: 'Red Hat AI Stack'",
   "href: '/project-matrix'",
   "path: '/project-matrix/*'",
 ]) {
@@ -120,6 +120,6 @@ if (errors.length) {
 
 console.log(`Project Matrix Dashboard host-integration contract passed${requireBuild === 'true' ? ' with built artifacts' : ''}.`);
 console.log(`- federated module: ${mf.name}`);
-console.log(`- navigation: Agentic Platform / Red Hat AI: Agentic Strategy`);
+console.log(`- navigation: AI Stack / Red Hat AI Stack`);
 console.log(`- BFF: ${service.namespace}/${service.name}:${service.port}`);
 NODE

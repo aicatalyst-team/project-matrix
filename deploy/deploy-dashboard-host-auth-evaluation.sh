@@ -15,7 +15,6 @@ AUTH_NAME="${AUTH_NAME:-project-matrix-dashboard-eval-auth}"
 AUTH_HOST="${AUTH_HOST:-project-matrix-dashboard-eval.apps.ocp-gb.ibm.redhataicatalyst.com}"
 AUTH_CLIENT="${AUTH_CLIENT:-project-matrix-dashboard-eval}"
 AUTH_IMAGE="${PROJECT_MATRIX_KUBE_AUTH_PROXY_IMAGE:-registry.redhat.io/rhoai/odh-kube-auth-proxy-rhel9@sha256:9b3c12230ba31b9c1962467ed46c1aa2eec8984bfe1ffc1fdb2225f6f4a6e325}"
-OAUTH_AUTHORIZE_URL="${OAUTH_AUTHORIZE_URL:-https://oauth-openshift.${AUTH_HOST#*.}/oauth/authorize}"
 
 oc get deployment/"${EVAL_DEPLOYMENT}" -n "${PLATFORM_NAMESPACE}" >/dev/null
 oc get serviceaccount/kube-auth-proxy -n "${AUTH_NAMESPACE}" >/dev/null
@@ -175,10 +174,7 @@ spec:
         - --pass-access-token=true
         - --set-xauthrequest=true
         - --enable-k8s-token-validation=true
-        - --login-url=${OAUTH_AUTHORIZE_URL}
         - --redirect-url=https://${AUTH_HOST}/oauth2/callback
-        - --redeem-url=https://oauth-openshift.openshift-authentication.svc:443/oauth/token
-        - --provider-ca-file=/etc/pki/tls/certs/openshift-service-ca.crt
         - --tls-cert-file=/etc/tls/private/tls.crt
         - --tls-key-file=/etc/tls/private/tls.key
         - --tls-min-version=TLS1.2
@@ -188,6 +184,7 @@ spec:
         - --cookie-secure=true
         - --cookie-httponly=true
         - --cookie-samesite=lax
+        - --cookie-domain=${AUTH_HOST}
         - --cookie-name=_project_matrix_dashboard_eval
         - --provider=openshift
         - --ssl-insecure-skip-verify=false

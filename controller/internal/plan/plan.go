@@ -26,6 +26,7 @@ type Plan struct {
 	Mode            string             `json:"mode"`
 	SelectedProfile string             `json:"selectedProfile"`
 	Phase           string             `json:"phase"`
+	CurrentStep     string             `json:"currentStep"`
 	ActiveMode      string             `json:"activeMode"`
 	SupportBoundary string             `json:"supportBoundary"`
 	Execution       string             `json:"execution"`
@@ -56,6 +57,7 @@ func Build(spec matrixv1alpha1.LayerDeploymentSpec) Plan {
 		Mode:            spec.Mode,
 		SelectedProfile: selectedProfile,
 		Phase:           "Pending",
+		CurrentStep:     layerStep(spec.Layer, "Preparing"),
 		ActiveMode:      "Unknown",
 		SupportBoundary: supportBoundary(spec.Mode),
 		Execution:       "not-started",
@@ -63,6 +65,7 @@ func Build(spec matrixv1alpha1.LayerDeploymentSpec) Plan {
 
 	if spec.DesiredState == Disabled {
 		result.Phase = "Disabled"
+		result.CurrentStep = layerStep(spec.Layer, "Layer disabled")
 		result.Execution = "disabled-by-user"
 		result.Message = "LayerDeployment is disabled by the end-user operating-mode contract."
 		result.Conditions = []metav1.Condition{
@@ -91,6 +94,7 @@ func Build(spec matrixv1alpha1.LayerDeploymentSpec) Plan {
 
 	result.ActiveMode = spec.Mode
 	result.Phase = "Preflighting"
+	result.CurrentStep = layerStep(spec.Layer, "Checking Gateway prerequisites")
 	result.Execution = "plan-only"
 	result.Conditions = []metav1.Condition{
 		condition(ConditionAccepted, metav1.ConditionTrue, "Accepted", "Layer identity and operating mode are valid."),
@@ -139,6 +143,7 @@ func supportBoundary(mode string) string {
 
 func blocked(result Plan, reason, message string) Plan {
 	result.Phase = "Blocked"
+	result.CurrentStep = layerStep(result.Layer, "Blocked before installation")
 	result.Execution = "blocked-before-mutation"
 	result.Message = message
 	result.Conditions = []metav1.Condition{
@@ -147,6 +152,13 @@ func blocked(result Plan, reason, message string) Plan {
 		condition(ConditionReady, metav1.ConditionFalse, reason, "No cluster mutation was attempted."),
 	}
 	return result
+}
+
+func layerStep(layer, step string) string {
+	if layer == "Gateway" {
+		return step
+	}
+	return fmt.Sprintf("%s %s layer", step, layer)
 }
 
 // Block exposes the same fail-before-mutation result for live dependency

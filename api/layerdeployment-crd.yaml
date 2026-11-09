@@ -104,6 +104,9 @@ spec:
                     - Degraded
                     - Blocked
                     - Disabled
+                currentStep:
+                  type: string
+                  description: Layer-specific action currently being performed or the blocking step.
                 activeMode:
                   type: string
                   enum:
@@ -137,3 +140,39 @@ spec:
                   type: string
                 supportBoundary:
                   type: string
+                components:
+                  type: array
+                  description: Per-component Gateway-layer health and validation state.
+                  items:
+                    type: object
+                    required:
+                      - name
+                      - status
+                      - detail
+                    properties:
+                      name:
+                        type: string
+                      status:
+                        type: string
+                      detail:
+                        type: string
+                demoUseCases:
+                  type: array
+                  description: Demoable workflows exposed after the layer installation.
+                  items:
+                    type: object
+                    required:
+                      - name
+                      - status
+                      - detail
+                    properties:
+                      name:
+                        type: string
+                      status:
+                        type: string
+                      detail:
+                        type: string
+                      actionLabel:
+                        type: string
+                      actionHref:
+                        type: string

@@ -105,6 +105,104 @@ image-registry.openshift-image-registry.svc:5000/project-matrix-build/project-ma
 
 This cluster-local digest is not yet a canonical Quay promotion.
 
+## AI Stack UX and status contract — 2026-10-21
+
+The live Matrix runtime and isolated Dashboard host were rebuilt after the
+user-facing terminology and layer-specific status contract were refined:
+
+```text
+image-registry.openshift-image-registry.svc:5000/project-matrix-build/project-matrix-controller@sha256:64195518ca33fe6f0d02a6ad3d272cd19b30639067f67e672ed063332457cabd
+image-registry.openshift-image-registry.svc:5000/project-matrix-build/project-matrix-dashboard@sha256:ae40b0d64b15d6f377fe3687b58223338a4d6ae87bf40024e1f0e2020e73945d
+image-registry.openshift-image-registry.svc:5000/project-matrix-build/project-matrix-dashboard-host@sha256:9927d10c096e131a16d291530a2640b57cc1b15562b8fb5ffd7fe1845090d66b
+```
+
+The controller now publishes `status.currentStep`, allowing the Dashboard to
+show what the selected layer is actually doing or why it is blocked. The
+evaluation installer also uses a bounded host-build context and immutable
+sidecar references.
+
+## AI Stack layered landing page — 2026-10-21
+
+The isolated host was rebuilt after the installer experience was expanded from
+a Gateway-only page into the Red Hat AI Stack landing page. The host now shows
+the horizontal layers in their architectural order, with Gatekeeper as the
+first available guided installer:
+
+```text
+image-registry.openshift-image-registry.svc:5000/project-matrix-build/project-matrix-dashboard-host@sha256:a5d04572679cbf1c2bebf8373c85f000fcc15d2e0a50deffcc63121ea170cddc
+```
+
+This is the current cluster-local evaluation digest. It is not yet a
+canonical Quay promotion and does not replace the operator-managed native
+Dashboard.
+
+## Interactive stack-map installer — 2026-10-21
+
+The isolated evaluation host was rebuilt with the code-native interactive
+stack map. Its layer bands are selectable and use drawing-inspired hover,
+focus, lift, shading, and contextual installer treatment:
+
+```text
+image-registry.openshift-image-registry.svc:5000/project-matrix-build/project-matrix-dashboard-host@sha256:184bf7a80c1ae2e92cf82beb59da45620616cd9e540c547f5e93ef3aa35fea0d
+```
+
+The digest is live on `project-matrix-dashboard-eval` and remains isolated
+from the operator-managed native Dashboard.
+
 Do not commit registry credentials. A cluster deployment may use the internal
 mirror directly, or use the Quay references with an approved image-pull
 secret.
+
+## Exact supplied stack artwork and minimal installer rail — 2026-10-21
+
+The isolated Dashboard host now uses the supplied hand-drawn platform-stack
+artwork as its primary visual surface. Transparent layer hotspots provide
+keyboard-accessible selection and subtle hover lift without replacing the
+artwork with a CSS approximation. The Gateway selection uses the minimal
+OpenClaw-like one-action installer rail and live LayerDeployment status.
+
+image-registry.openshift-image-registry.svc:5000/project-matrix-build/project-matrix-dashboard-host@sha256:8d44afe0da81929d7c00dafb425e44da0ad4eb309ebfbb10ff23fe8a0bc4318c
+
+This digest is live on the protected project-matrix-dashboard-eval route.
+The host smoke checks pass; browser acceptance remains required before the
+GitHub milestone push.
+
+## From-scratch SVG artwork and workflow state — 2026-10-22
+
+The raster artwork implementation is superseded. The current host renders the
+stack from scratch as an interactive SVG and implements the OpenClaw workflow:
+installation preview before the action, followed by live controller-owned
+status until completion or a truthful gate.
+
+image-registry.openshift-image-registry.svc:5000/project-matrix-build/project-matrix-dashboard-host@sha256:618983d55689f25dfb4469823e61d08a8752586476b7c8446876703118637f0c
+
+This digest is live on project-matrix-dashboard-eval. No screenshot asset is
+required by the current implementation.
+
+## Artwork cleanup — 2026-10-22
+
+The live host now uses a transparent SVG canvas, no surrounding layer arrows,
+and the intended colored bands. The marker-wobble filter was removed because
+it could render the fills black in the host browser.
+
+image-registry.openshift-image-registry.svc:5000/project-matrix-build/project-matrix-dashboard-host@sha256:a4c7b72bb84e063759f8c2f83cc98181679155ecb6ca004d4a3781d6291722c3
+
+This digest is live on project-matrix-dashboard-eval and remains isolated
+from the operator-managed native Dashboard. Browser acceptance is the
+remaining gate before the GitHub milestone push.
+
+## Foreground layer interaction and reliable concept motion — 2026-10-22
+
+The dashboard host now loads with every layer fully visible. An explicit layer
+selection creates the focus state: the selected band lifts above the stack and
+non-selected bands recede into the background. The selected band remains the
+primary lift; its individual concepts use dedicated SVG wrapper elements with
+staggered motion so icons, labels, and pills visibly acknowledge the selected
+layer without fighting the layer transform.
+
+image-registry.openshift-image-registry.svc:5000/project-matrix-build/project-matrix-dashboard-host@sha256:613521718598be5f145d3f769cac1bb829ce7eade262312f6dd902406ff70a5d
+
+This digest is live on project-matrix-dashboard-eval. The protected route
+returns OAuth 302, the direct route returns 401, and the deployed pod is
+healthy with all three containers ready. Browser acceptance remains the final
+UI gate before the GitHub milestone push.

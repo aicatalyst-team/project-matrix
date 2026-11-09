@@ -31,7 +31,7 @@ func TestReconcileCreatesGatekeeperJobAndStatusPlan(t *testing.T) {
 	}
 	client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(deployment).WithStatusSubresource(deployment).Build()
 	reconciler := &LayerDeploymentReconciler{
-		Client:                client,
+		Client:                  client,
 		GatekeeperExecutorImage: "registry.example/gatekeeper:dev",
 	}
 
@@ -143,5 +143,29 @@ func TestReconcileBlocksCompetingActiveLayerOwners(t *testing.T) {
 	}
 	if observed.Status.Phase != "Blocked" {
 		t.Fatalf("phase = %q, want Blocked", observed.Status.Phase)
+	}
+}
+
+func TestGatewayStatusExposesComponentGatesAndDemoUseCases(t *testing.T) {
+	components := gatewayComponents("Ready")
+	if len(components) != 4 {
+		t.Fatalf("component count = %d, want 4", len(components))
+	}
+	if components[0].Name != "MCP Gateway" || components[0].Status != "Healthy" {
+		t.Fatalf("MCP component = %#v, want Healthy", components[0])
+	}
+	if components[1].Name != "MaaS Gateway" || components[1].Status != "Validation gate" {
+		t.Fatalf("MaaS component = %#v, want Validation gate", components[1])
+	}
+
+	useCases := gatewayDemoUseCases("Ready")
+	if len(useCases) != 3 {
+		t.Fatalf("demo use-case count = %d, want 3", len(useCases))
+	}
+	if useCases[0].ActionHref != "/ai-hub/mcp-servers/catalog" {
+		t.Fatalf("unexpected MCP demo entry point: %q", useCases[0].ActionHref)
+	}
+	if useCases[1].Status != "Validation gate" {
+		t.Fatalf("MaaS demo status = %q, want Validation gate", useCases[1].Status)
 	}
 }

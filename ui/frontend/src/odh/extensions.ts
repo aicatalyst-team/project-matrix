@@ -16,8 +16,8 @@ const extensions: (NavExtension | RouteExtension | AreaExtension)[] = [
   {
     type: 'app.navigation/section',
     properties: {
-      id: 'agentic-platform',
-      title: 'Agentic Platform',
+      id: 'ai-stack',
+      title: 'AI Stack',
       group: '5_agent_management',
       iconRef: () => import('./ProjectMatrixNavIcon'),
     },
@@ -26,9 +26,9 @@ const extensions: (NavExtension | RouteExtension | AreaExtension)[] = [
     type: 'app.navigation/href',
     properties: {
       id: 'project-matrix',
-      title: 'Red Hat AI: Agentic Strategy',
+      title: 'Red Hat AI Stack',
       href: '/project-matrix',
-      section: 'agentic-platform',
+      section: 'ai-stack',
       path: '/project-matrix/*',
     },
   },

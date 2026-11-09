@@ -135,6 +135,10 @@ immutable evaluation images.
 - [ ] Accept the Project Matrix homepage tile into the normal OpenShift AI Dashboard host release; direct image overrides were tested and reconciled away by the operator.
 - [x] Add explicit teardown/reinstall handling for the optional combined-host and OAuth evaluation resources without targeting the operator-managed Dashboard.
 - [x] Establish the lean release contract: customer installs pull immutable runtime images and apply manifests; maintainer builds exclude local dependency caches and unrelated source trees.
+- [x] Add the Gateway component-status contract for MCP Gateway, MaaS Gateway, identity/exposure, and routing/quota/conformance.
+- [x] Add the Gateway post-install demo-use-case contract and AI Hub rendering for authenticated MCP federation, governed MaaS response, and troubleshooting evidence.
+- [x] Add the portable namespace-scoped evaluator RBAC bootstrap required by the AI Hub SubjectAccessReview; verify the live evaluator can create MCPServer resources without cluster-admin.
+- [ ] Implement the MaaS Gateway validation/execution adapter and promote its demo from Validation gate to Healthy only after real governed model-response evidence passes.
 - [ ] Triage the combined Dashboard host dependency audit findings before calling the host release production-grade.
 - [ ] Add the next horizontal layer adapter after Gatekeeper contracts are accepted.
 
@@ -263,3 +267,219 @@ These are implementation gates for the Gateway horizontal, not customer
 documentation tasks. The one-click contract is successful only when the
 selected profile renders a working reference layout and explains the exact
 resource or platform condition when it cannot.
+
+## Client/demo and productization acceptance — current
+
+- [x] Treat client demonstration, client usability, and development handoff
+  as one release objective rather than separate implementations.
+- [x] Validate the isolated Dashboard host shell, Matrix federated remote,
+  authenticated BFF API, OAuth redirect, Production default, and Preview
+  switch on the live OpenShift AI cluster.
+- [x] Restore the live cluster to the Production default after the Preview
+  acceptance test; preserve fail-closed status and evidence when support or
+  dependency gates are unmet.
+- [ ] Perform the browser acceptance test at the evaluation URL as the same
+  client-visible journey.
+- [ ] Push the reviewed Project Matrix milestone to the AI Catalyst GitHub
+  repository after browser acceptance.
+- [ ] Produce the clean Dashboard host release handoff for development;
+  native landing-page visibility remains a host release/packaging action and
+  is not achieved by patching the operator-managed Dashboard in place.
+
+## AI Stack UX refinement — current
+
+- [x] Rename the end-user navigation and landing destination to **AI Stack**
+  and **Red Hat AI Stack** while retaining official strategy terminology in
+  the architectural documentation.
+- [x] Make the page a stack-aligned landing page for independent horizontal
+  layer installers, with Gateway as the first available layer.
+- [x] Make the stack map interactive: each layer is a keyboard-accessible
+  selector with drawing-inspired color, lift, shadow, and contextual hover
+  treatment.
+- [x] Reduce the Gateway layer to one lifecycle-aware primary action; the
+  Production/Innovation switch selects the lane without silently submitting.
+- [x] Expose controller-owned `status.currentStep` so installation status
+  identifies the actual layer work or blocking gate.
+- [x] Rebuild and roll out the controller, BFF/remote, and isolated host
+  images on the live evaluation cluster.
+- [ ] Complete browser acceptance of the stack-aligned landing page, refreshed
+  client-facing wording, and current-step status before the GitHub milestone
+  push.
+
+## Exact stack artwork prototype — superseded 2026-10-22
+
+- [x] Prototype the supplied artwork direction and layer interaction model.
+- [x] Validate the live host packaging path.
+- [x] Reject the raster-image and overlay implementation as unsuitable.
+- [x] Replace it with the from-scratch SVG and workflow implementation below.
+
+## Workflow correction and from-scratch artwork — 2026-10-22
+
+- [x] Remove the raster screenshot and its transparent hotspot treatment.
+- [x] Render the stack from scratch as an interactive SVG with marker-style
+  strokes, typography, icons, colored bands, hover lift, focus, and selection
+  states, without the surrounding arrows or opaque canvas.
+- [x] Implement the OpenClaw workflow: show what the layer installs before
+  the click; after the click, show the live controller step, phase, lane, and
+  completion or blocking state.
+- [x] Rebuild and roll out the corrected host to the live evaluation route.
+- [ ] Human browser acceptance of the from-scratch visual and click workflow.
+
+## Artwork cleanup — 2026-10-22
+
+- [x] Remove the opaque white SVG background so the artwork sits naturally in
+  the OpenShift AI page.
+- [x] Remove the decorative arrows surrounding the stack bands.
+- [x] Remove the marker-wobble filter that caused the colored bands to render
+  black in the host browser.
+- [x] Rebuild and roll out host digest
+  `sha256:f2f062a5b45f551e0ea6a1b02e18ba55e3505f25d8d3d79cdf1dbc96ec5465d5`.
+- [ ] Human browser acceptance of the cleaned artwork and click workflow.
+
+## Native OpenShift AI surface cleanup — 2026-10-22
+
+- [x] Align the page background with the native PatternFly/OpenShift AI
+  secondary surface token.
+- [x] Remove custom elevation and the custom red top rule from the installer
+  panel; retain standard border, radius, spacing, and native surface colors.
+- [x] Keep the hand-drawn treatment scoped to the interactive stack artwork.
+- [x] Roll out host digest
+  `sha256:690d9f6952748b218e62daac057ae94d75c65747349c053fcdb985ca9f6df024`.
+- [ ] Human browser acceptance of the seamless dashboard presentation.
+
+## Palette and layer-content motion correction — 2026-10-22
+
+- [x] Restore the hand-drawn palette in the actual OpenShift AI host package;
+  the missing host palette was the cause of the black bands.
+- [x] Apply explicit SVG fill and fill-opacity values to every layer band.
+- [x] Add a restrained lift to the concepts inside the hovered or selected
+  layer so the layer contents acknowledge the interaction.
+- [x] Preserve reduced-motion behavior for the content lift.
+- [x] Roll out host digest
+  `sha256:8ddd1a8e109bfd8688caafd576fe6773f9c6e81d8c4e65dc84d0837299364e37`.
+- [ ] Human browser acceptance of the palette and layer-content motion.
+
+## Foreground layer interaction — 2026-10-22
+
+- [x] Keep the selected layer itself lifted above the stack with a stronger
+  marker outline, shadow, and seven-pixel foreground rise.
+- [x] Recede every non-selected layer to a muted background state while a
+  selection is active.
+- [x] Keep every layer in the foreground until the user makes an explicit
+  selection.
+- [x] Stagger-lift the selected layer's individual concepts inside the band
+  using dedicated SVG wrapper elements so the motion is visible and does not
+  conflict with the layer transform.
+- [x] Keep the selected layer band as the primary lift, with its individual
+  concepts lifting as a secondary acknowledgement of the layer contents.
+- [x] Preserve hover and keyboard focus behavior for the same interaction.
+- [x] Roll out host digest
+  `sha256:613521718598be5f145d3f769cac1bb829ce7eade262312f6dd902406ff70a5d`.
+- [ ] Human browser acceptance of foreground/background emphasis and motion.
+
+## Upstream contribution pivot — governing gates
+
+- [x] Refresh the `opendatahub-io/odh-dashboard` upstream reference.
+- [x] Create a clean `project-matrix-upstream` branch from `upstream/main`.
+- [x] Preserve the live RHOAI evaluation deployment as a demo snapshot rather
+  than the implementation source of truth.
+- [x] Create and associate initiative [AIPCC-33612](https://redhat.atlassian.net/browse/AIPCC-33612)
+  under Outcome [AIPCC-5516](https://redhat.atlassian.net/browse/AIPCC-5516),
+  using [AIPCC-30779](https://redhat.atlassian.net/browse/AIPCC-30779) as the
+  structural template.
+- [ ] Complete the repository Definition of Ready for AIPCC-33612 before
+  further feature implementation.
+- [ ] Finalize the upstream UX, API/CRD, architecture, dependency, security,
+  performance, disconnected, interoperability, and usability reviews.
+- [ ] Implement and validate the Project Matrix extension in the clean
+  upstream worktree with the documented `pnpm` dev/test/lint workflow.
+- [ ] Push the feature branch to the fork and open the upstream PR; use the
+  generated PR image and CI as the upstream acceptance environment.
+- [ ] Wait for upstream merge before creating the downstream RHOAI backport.
+
+## AI Hub integration pivot — 2026-10-24
+
+- [x] Adopt [RHAISTRAT-2791](https://redhat.atlassian.net/browse/RHAISTRAT-2791)
+  as the product-alignment anchor for the Gateway horizontal.
+- [x] Make AI Hub the product home for the complete Project Matrix effort.
+- [x] Retire the custom Project Matrix landing page and hand-drawn artwork as
+  product UI; retain them only as historical evaluation artifacts.
+- [ ] Rebase the upstream implementation on the existing AI Hub surface and
+  native visual/aesthetic patterns.
+- [ ] Map the Project Matrix horizontal layer model into the AI Hub workflow.
+- [ ] Implement the Gateway installer against the RHAISTRAT-2791 workflow:
+  prerequisites, RHCL/gateway, guardrails, MCPServer, verification, and
+  uninstall.
+- [ ] Preserve Production as the default lane and expose Innovation as the
+  explicit evaluation lane within the same AI Hub experience.
+- [ ] Reassess AIPCC-33612 content and links against the AI Hub pivot before
+  Definition of Ready review.
+
+## Upstream AI Hub installer slice — 2026-10-24
+
+- [x] Reuse the existing upstream AI Hub MCP catalog and detail route.
+- [x] Change the catalog detail action to an explicit Install MCP server flow.
+- [x] Add prerequisite review using the existing MCP Lifecycle and gateway
+  readiness signals.
+- [x] Submit the existing catalog-derived `MCPServer` deployment through the
+  upstream deployment API.
+- [x] Poll the real project deployment and render its cluster conditions during
+  installation.
+- [ ] Add RHCL discovery and supported-version reporting.
+- [ ] Add SubjectAccessReview/RBAC preflight with actionable failure details.
+- [ ] Add mandatory guardrail policy validation and provisioning.
+- [ ] Add authenticated MCP initialize, tools/list, and tools/call checks.
+- [ ] Add uninstall and post-install lifecycle handling.
+- [ ] Run the repository's upstream pnpm lint, type-check, unit, and Cypress
+  checks in an environment with the project toolchain installed.
+
+## Live AI Hub status-flow refinement — 2026-11-06
+
+- [x] Keep the installer modal authoritative until the real deployment reaches
+  a terminal state.
+- [x] Provide a durable **View installation status** action from deployments.
+- [x] Require MCP readiness and Gateway registration readiness before showing
+  the deployment as Available.
+- [x] Distinguish the public Gateway endpoint from the cluster-local Service
+  URL; treat the latter as copy-only rather than a browser link.
+- [x] Build the upstream worktree in RHOAI mode and roll the immutable image to
+  the live managed dashboard.
+- [ ] Human-test the modal lock, live status transition, durable reopen path,
+  and endpoint copy behavior.
+- [ ] Complete the remaining Gateway-layer gates: MaaS, authenticated MCP,
+  identity/exposure, routing/quotas, conformance, and uninstall.
+
+## Installation status truthfulness correction — 2026-11-06
+
+- [x] Match a reinstall to the current MCP deployment UID instead of a
+  same-named prior deployment.
+- [x] Keep active installation controls locked until a real terminal state.
+- [x] Report the active phase, elapsed time, polling source, and long-running
+  guidance in the installer modal.
+- [x] Correct Gateway registration state messaging.
+- [x] Rebuild and roll the corrected immutable RHOAI image to the live
+  dashboard; both replicas are healthy.
+- [ ] Fresh-browser human test: delete the test deployment, reinstall, confirm
+  the modal cannot be skipped, and confirm the durable status view only opens
+  after completion or failure.
+
+## Live upstream development loop — 2026-10-24
+
+- [x] Confirm the official upstream development path: run the Dashboard Module
+  Controller from source against the live cluster with `RELATED_IMAGE_*`
+  overrides.
+- [x] Distinguish `?devFeatureFlags` (browser-session flags) from actual image
+  deployment and controller development mode.
+- [x] Confirm the live `Dashboard/default-dashboard` is Managed by the
+  `DataScienceCluster/default-dsc` and that raw Deployment/ConfigMap patches
+  are reconciled back.
+- [x] Capture a pre-handoff snapshot of controller deployment, Dashboard
+  condition, managed images, and rollback state. Baseline is healthy:
+  Dashboard Ready, ProvisioningSucceeded, Degraded=False, and
+  DeploymentsAvailable=True; the live controller is owned by
+  DataScienceCluster/default-dsc.
+- [ ] Perform the reversible controller handoff for upstream Innovation-lane
+  testing, preserving the production host image.
+- [ ] Validate the AI Hub installer end to end against the live cluster.
+- [ ] Restore managed RHOAI reconciliation and verify Dashboard health and
+  production image restoration.

@@ -11,7 +11,7 @@ frontend/src/pages/home/ProjectMatrixHomeCard.tsx
 ```
 
 and is rendered by `frontend/src/pages/home/Home.tsx`. The host card has one
-responsibility: present **Red Hat AI: Agentic Strategy** and open
+responsibility: present **Red Hat AI Stack** and open
 `/project-matrix`. The federated Project Matrix package owns The Construct,
 layer status, the Production/Preview toggle, and the constrained BFF request.
 

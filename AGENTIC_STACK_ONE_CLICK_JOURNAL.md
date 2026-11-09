@@ -2229,3 +2229,635 @@ band. The tile is implemented in host source, but it will become visible on
 the native landing page only through the normal Dashboard release/packaging
 path. Until then, the isolated Matrix host remains the browser demonstration
 surface and must not be presented as the native production Dashboard.
+
+## Client and Development Handoff Bar — 2026-10-21
+
+The objective is explicit and persistent: Project Matrix must produce one
+artifact that can be demonstrated to a client, handed to a client for use,
+and handed to product development as the bounded implementation for official
+OpenShift AI productization. A client demonstration is not allowed to depend
+on a private maintainer workflow or a divergent demo-only code path.
+
+The live Dashboard integration reached its first end-to-end acceptance point.
+The isolated evaluation host uses the combined Dashboard image, the Red Hat
+`odh-kube-auth-proxy` OAuth front door, the Matrix federated remote, and the
+Matrix BFF/controller on the supplied OpenShift AI cluster. Authenticated
+smoke tests pass for the host shell, `/_mf/projectMatrix/remoteEntry.js`, and
+the Gatekeeper API. Unauthenticated access redirects to OpenShift OAuth.
+
+The same authenticated API contract exercised the Innovation switch. The BFF
+accepted the constrained Preview intent, the controller selected the upstream
+preview executor, and execution stopped before mutation because the live RHCL
+readiness gate is blocked: `rhcl-operator` is absent and the pinned upstream
+preview requires RHCL 1.5.0 or newer. The default Production lane was
+restored and remains fail-closed with evidence for its nine unmet preflight
+gates. This proves that the UI action, identity boundary, lane selection,
+asynchronous status path, and support-boundary behavior use the same shipped
+control plane.
+
+The evaluation URL is a client/demo surface, not a replacement for the
+operator-managed native Dashboard. The native `rh-ai` landing-page tile is
+implemented in the compatible Dashboard host source and combined host image,
+but can become visible in the native production UI only through the normal
+OpenShift AI Dashboard host release/packaging path. Product development now
+has a concrete host integration contract and a live-tested reference to
+productize; the next acceptance step is browser validation of the evaluation
+surface, followed by the clean GitHub milestone push.
+
+## AI Stack user experience refinement — 2026-10-21
+
+The customer-facing destination is now named **AI Stack**, with the page
+presented as **Red Hat AI Stack**. “Red Hat AI: Agentic Strategy” remains the
+architectural source vocabulary in the journal and layer mapping, but it is no
+longer the primary navigation or landing-page label.
+
+The Gateway horizontal now has one primary action whose verb reflects the
+actual lifecycle: `Install Gateway`, `Installing ...`, `Gateway installed`, or
+`Retry Gateway`. The selected layer remains visible as `Gateway layer · The
+Gatekeeper`, with a concise description of the MCP Gateway, MaaS Gateway,
+identity policy, exposure, and conformance work included in that layer.
+
+The LayerDeployment API now exposes `status.currentStep`. The controller
+publishes Gateway-specific steps such as checking Red Hat-supported
+prerequisites, installing and validating the isolated upstream Gateway, ready,
+or blocked by a dependency/validation gate. This status is consumed by the
+Dashboard rather than invented solely in the browser, preserving the same
+contract for every future horizontal layer.
+
+## AI Stack landing page and installer flow — 2026-10-21
+
+The next UX correction was important: the destination cannot look like a
+Gateway-only application when the product objective is a family of independent
+horizontal installers. The Matrix page is now a true **Red Hat AI Stack**
+landing page. It presents the layers in their architectural order:
+
+```text
+BYOA → Secure Agent Onboarding → Gateway → OGX → llm-d → vLLM (Core) → AgentOps → Infrastructure
+```
+
+Each layer has its official Red Hat AI: Agentic Strategy name, its Matrix
+codename, a concise description, and an honest availability state. Gatekeeper
+is the only enabled installer today; the remaining rows are visible as
+“Coming soon” rather than being hidden or represented as fake controls. This
+establishes the reusable product contract for every future layer: one layer,
+one guided install action, one truthful status stream, and one evidence path.
+
+The OpenClaw-on-ODH experience provided the interaction model: a dedicated
+entry point, one obvious deployment action, live lifecycle language, and a
+plain result for success or failure. Matrix now follows that model while
+retaining its Kubernetes controller and authenticated BFF. The Innovation
+switch no longer submits an operation merely because it was toggled; it selects
+the lane and the user explicitly presses the single install action. Production
+remains the default.
+
+The evaluation host was rebuilt from the bounded ODH Dashboard context and
+rolled to the live isolated route with immutable host digest
+`sha256:a5d04572679cbf1c2bebf8373c85f000fcc15d2e0a50deffcc63121ea170cddc`.
+The operator-managed native Dashboard remains untouched. Browser acceptance of
+the stack landing page is the final gate before freezing this UI milestone and
+promoting it to GitHub; only then does the effort return to the remaining
+production, innovation, RHCL, authentication, support, and release gaps.
+
+## Interactive stack-map direction — 2026-10-21
+
+The static stack catalog was not sufficient for the intended OpenClaw-like
+installer experience. The stack map is now a code-native interactive component
+that preserves the reference drawing’s visual language: colored horizontal
+bands, slightly irregular paper-like edges, black hand-drawn-style outlines,
+red selection treatment, and a lifted shadow on hover or keyboard focus.
+
+Every layer band is a real accessible button. Selecting a band changes the
+installer panel below it. Gatekeeper opens the live Gateway installer; future
+layers open an honest “Coming soon” panel until their adapter and validation
+contract exist. This keeps the visual metaphor aligned with the actual shipped
+capability instead of turning the illustration into decorative artwork.
+
+The final interaction target is therefore: enter **Red Hat AI Stack**, hover or
+select a layer in the map, and receive that layer’s guided installer and
+truthful lifecycle state in the same page. The live host promotion is pending
+because the current `oc` session expired during the rebuild; source validation
+passes and the next cluster action is to rebuild the isolated host with this
+interactive remote, then repeat browser acceptance before the GitHub push.
+
+## Interactive stack-map promotion — 2026-10-21
+
+The cluster session was restored and the combined isolated Dashboard host was
+rebuilt successfully. The interactive stack map is now live at:
+
+`https://project-matrix-dashboard-eval.apps.ocp-gb.ibm.redhataicatalyst.com/`
+
+The OAuth front door returns the expected unauthenticated redirect, while
+authenticated requests return HTTP 200 for both the host shell and
+`/_mf/projectMatrix/remoteEntry.js`. The evaluation host is running immutable
+digest
+`sha256:184bf7a80c1ae2e92cf82beb59da45620616cd9e540c547f5e93ef3aa35fea0d`.
+
+This closes the implementation gate for the visual installer entry point. The
+remaining acceptance action is human browser inspection: hover each layer,
+select future layers, select Gatekeeper, verify the Production default, toggle
+Innovation without submission, and confirm the single install action reports
+the real current step. After that acceptance, freeze and push the milestone to
+GitHub before returning to the remaining production-grade gaps.
+
+## Exact supplied artwork with minimal installer rail — 2026-10-21
+
+The code-native approximation was rejected because the product requirement is
+the supplied hand-drawn marker artwork itself. The Matrix UI now uses the
+exact clean platform-stack crop as its visual asset. The layer controls are
+transparent accessible hotspots positioned over the original bands, so hover
+lift, focus, selection, and status do not redraw or reinterpret the marker
+artwork.
+
+The installer surface below the artwork now follows the OpenClaw-on-ODH
+interaction model: one selected layer, one clear Gateway action, live
+controller-owned status, Production selected by default, Innovation selected
+explicitly without submitting, and expandable validation evidence. Future
+layers remain visible in the stack and honestly report “Coming soon.”
+
+The optimized artwork is served as a 531 KiB JPEG from the dashboard's static
+image path. This preserves the supplied look while avoiding the unsupported
+asset-module path in the shared OpenShift AI host webpack configuration.
+
+The combined host was rebuilt natively and promoted to the protected live
+evaluation route:
+
+https://project-matrix-dashboard-eval.apps.ocp-gb.ibm.redhataicatalyst.com/
+
+Current immutable host digest:
+
+sha256:8d44afe0da81929d7c00dafb425e44da0ad4eb309ebfbb10ff23fe8a0bc4318c
+
+Automated checks pass: unauthenticated host 302, authenticated host 200,
+authenticated /_mf/projectMatrix/remoteEntry.js 200, and authenticated
+artwork URL 200. Human browser inspection is now the immediate gate before
+the GitHub milestone push.
+
+## Correction: from-scratch stack artwork and workflow state — 2026-10-22
+
+The prior implementation used the supplied screenshot as a raster image with
+transparent interaction targets. That was incorrect and is superseded.
+
+The current implementation renders the platform stack from scratch as an
+interactive SVG component. Each layer is a real SVG interaction target with
+its own marker-style band, irregular outline, handwritten label, icons,
+arrows, hover lift, keyboard focus, and selected state. No supplied screenshot
+is shipped or displayed by the current implementation.
+
+The Gateway experience now follows the actual OpenClaw UX lesson:
+
+1. Before the action, the user sees exactly what the Gateway layer installs:
+   MCP Gateway, MaaS Gateway, identity/authenticated exposure, and validation
+   evidence.
+2. The user selects Production or Innovation and clicks one action.
+3. The preview changes into live installation status showing the actual
+   controller-owned step, phase, and lane until the operation completes or
+   stops at a dependency/support gate.
+
+The corrected host is live at the protected evaluation route:
+
+https://project-matrix-dashboard-eval.apps.ocp-gb.ibm.redhataicatalyst.com/
+
+Current host digest:
+
+sha256:618983d55689f25dfb4469823e61d08a8752586476b7c8446876703118637f0c
+
+The standalone frontend type-check and production build pass. The host
+rollout and OAuth/module smoke checks pass. Browser acceptance is now the
+remaining UI gate before the GitHub milestone push.
+
+## Artwork cleanup — 2026-10-22
+
+The first live SVG render preserved the intended band colors in source, but
+the host browser showed black bands because the marker-wobble SVG filter was
+not rendering safely in that environment. The final cleanup removes that
+filter, removes the opaque white SVG canvas, and removes the surrounding
+decorative arrows. The bands remain code-native SVG with their marker-style
+outlines, typography, icons, hover lift, and interactive layer selection.
+
+The corrected host was rebuilt and rolled out with immutable digest
+`sha256:a4c7b72bb84e063759f8c2f83cc98181679155ecb6ca004d4a3781d6291722c3`.
+The protected route and running pod are healthy; browser inspection is the
+remaining acceptance gate.
+
+## Foreground-first selection and concept motion — 2026-10-22
+
+The interaction model was tightened around the OpenClaw-like workflow and the
+stack's role as a landing page for multiple horizontal installers:
+
+- Initial render keeps every layer in the foreground, with no arbitrary
+  preselected layer dimming the stack.
+- Clicking or keyboard-selecting a layer creates the focus state. The chosen
+  band lifts above the stack and the unclicked layers recede into the
+  background, preserving the layer's visual position and meaning.
+- The selected band is the primary lift. Its constituent concepts then lift
+  independently through dedicated SVG wrapper groups with a short stagger, so
+  the motion is visible for icons, labels, and capability pills rather than
+  relying on a transform composition that can be overridden by SVG children.
+- Hover and keyboard focus retain the same layer-level and concept-level
+  acknowledgement, while reduced-motion preferences disable the transitions.
+
+The host was rebuilt and promoted to the live evaluation deployment with
+immutable digest
+`sha256:613521718598be5f145d3f769cac1bb829ce7eade262312f6dd902406ff70a5d`.
+The protected route returns OAuth 302, the direct route returns 401, and the
+deployed pod reports all three containers ready. Human browser acceptance is
+the remaining UI gate before the GitHub milestone push.
+
+## Upstream-first contribution pivot — 2026-10-22
+
+The implementation target is now the public Open Data Hub Dashboard upstream
+repository. The live Red Hat OpenShift AI evaluation host remains useful as a
+demo snapshot, but it is no longer the source of truth for feature development.
+
+The supplied contribution workflow establishes the following order:
+
+1. Create or associate an upstream issue and satisfy the repository Definition
+   of Ready, including acceptance tests, dependencies, UX approval, API/CRD
+   review, architecture review, ownership, and stakeholder estimates.
+2. Branch from the refreshed `opendatahub-io/odh-dashboard` `upstream/main`.
+3. Develop and validate the Project Matrix extension in that upstream-based
+   worktree using the documented `pnpm` development, test, lint, and local
+   dashboard workflows.
+4. Push the feature branch to the fork and open a PR against
+   `opendatahub-io/odh-dashboard:main`; use the PR image and CI for review.
+5. Only after upstream merge, backport the resulting commit to the target
+   downstream RHOAI branch and run downstream/Konflux gates.
+
+The upstream remote was refreshed to commit
+`e072d058e6c4dbb1889c99637be71d252de5fbe7`, and a clean worktree/branch named
+`project-matrix-upstream` was created from that commit at
+`/Users/geraldtrotman/Virtualenvs/odh-dashboard-upstream`. The prior fork
+worktree and live evaluation release are preserved as a separate snapshot.
+
+No further downstream-only feature work will be treated as the implementation
+of record until the upstream issue and Definition of Ready gates are satisfied.
+
+The initiative created for this program is [AIPCC-33612|https://redhat.atlassian.net/browse/AIPCC-33612],
+parented under [AIPCC-5516|https://redhat.atlassian.net/browse/AIPCC-5516]. It
+uses [AIPCC-30779|https://redhat.atlassian.net/browse/AIPCC-30779] as the
+initiative template while broadening the scope from a Saudi Aramco demo to the
+upstream-first Red Hat AI Stack layer-installer program. Gateway is the first
+deliverable; vertical/use-case installers remain follow-on work.
+
+## Jira initiative refinement — 2026-10-24
+
+[AIPCC-33612|https://redhat.atlassian.net/browse/AIPCC-33612] was reviewed
+against the journal's detailed architecture, Aramco operational-burden,
+Dashboard UX, Production/Innovation, support-gate, and upstream-contribution
+entries. Its description was expanded to carry the actual implementation
+contract rather than a generic project summary:
+
+* the eight-layer Red Hat AI Stack/Project Matrix mapping and
+  horizontal-before-vertical sequencing;
+* Gatekeeper's Gateway-first scope and the full Aramco-derived listener,
+  routing, TLS, service-discovery, CRD, operator-scope, credential, isolation,
+  authentication, and MCP protocol acceptance contract;
+* Production-default and explicit Innovation-lane behavior, including the
+  no-upgrade boundary and fail-closed support claims;
+* Dashboard visual/workflow acceptance, security and platform boundaries;
+* upstream Open Data Hub contribution order, downstream backport sequencing,
+  Definition of Ready, Definition of Done, and planned child workstreams.
+
+A Jira comment records this refinement. The initiative remains in New status
+until stakeholders complete the Definition of Ready; no downstream evaluation
+deployment is being treated as upstream implementation evidence.
+
+## Jira template normalization — 2026-10-24
+
+The prior expanded Jira description was intentionally normalized after review.
+[AIPCC-33612|https://redhat.atlassian.net/browse/AIPCC-33612] now follows the
+same concise initiative template as [AIPCC-30779|https://redhat.atlassian.net/browse/AIPCC-30779]:
+Story, Description, Demo flow, Scope, Out of scope, Why now, Definition of
+Ready, Definition of Done, Estimation and Due Date, and Scope Guidance.
+
+Detailed listener, authentication, Aramco, and implementation evidence remains
+in this journal and belongs in child implementation issues and acceptance
+artifacts rather than the initiative summary.
+
+## Jira authoring procedure recovered — 2026-10-24
+
+The prior AIPCC-30779 authoring trail was reviewed and is now the standing Jira
+procedure for Project Matrix.
+
+* Use AIPCC-30779 as the immutable editorial and structural template.
+* Keep the exact native Jira sequence: Story, Description, Demo flow, Scope,
+  Out of scope, Why now, Definition of Ready, Definition of Done, Estimation
+  and Due Date, and Scope Guidance.
+* Preserve the exact terse style: bold inline labels in Story, bullets for
+  enumerated work, and short concrete statements. Only the initiative-specific
+  content changes.
+* Author through the configured Atlassian path and verify the saved Jira
+  document as native ADF nodes. Literal `h2.`, Markdown, or other markup shown
+  as text is a failed result.
+* Before declaring completion, compare the target issue's node sequence and
+  headings with AIPCC-30779 and visually confirm the rendered issue.
+
+AIPCC-33612 was repaired using this procedure. Jira API verification confirms
+that its native document node sequence and heading sequence now match
+AIPCC-30779 exactly; only its initiative content differs.
+
+## Product alignment — RHAISTRAT-2791 — 2026-10-24
+
+Project Matrix aligns with [RHAISTRAT-2791|https://redhat.atlassian.net/browse/RHAISTRAT-2791],
+“One-click install of the MCP server for Red Hat OpenShift with its gateway and
+guardrails from the AI Hub.” The feature sits under
+[RHAISTRAT-1339|https://redhat.atlassian.net/browse/RHAISTRAT-1339], “AI Hub AI
+Asset Delivery for Agentic Solutions.”
+
+RHAISTRAT-2791 is the product-alignment anchor for the Gateway horizontal. Its
+strategy calls for an `odh-dashboard` guided install wizard that detects
+prerequisites, validates RHCL and the MCP Lifecycle Operator module, performs
+RBAC preflight, configures or reuses a compatible gateway, provisions mandatory
+guardrails, creates the `MCPServer` resource, verifies the running server, and
+supports uninstall. It explicitly keeps external operator installation and
+upgrade outside the Dashboard responsibility.
+
+Project Matrix broadens this into the Red Hat AI Stack's layer-centric installer
+pattern. Gateway remains the first horizontal deliverable, while RHAISTRAT-2791
+provides the concrete AI Hub/MCP Gateway product path and its guardrail,
+dependency, verification, and lifecycle expectations.
+
+## AI Hub product-integration pivot — 2026-10-24
+
+The Project Matrix implementation will live in AI Hub. RHAISTRAT-2791 is the
+product UX and workflow reference, including its native AI Hub surface, visual
+language, guided-install flow, prerequisite gates, live progress, verification,
+and lifecycle handling.
+
+The custom Project Matrix landing page and hand-drawn stack artwork remain
+historical evaluation artifacts only. They are not the target product UI and
+must not be carried forward as a competing surface. The Red Hat AI Stack layer
+model, Production/Innovation lane behavior, and Gateway-first sequencing remain
+valid as the content and orchestration model behind the AI Hub experience.
+
+The next implementation target is to extend the existing AI Hub experience in
+the upstream `odh-dashboard`, using RHAISTRAT-2791's UI/aesthetic and guided
+workflow as the baseline. Subsequent Project Matrix layers should appear as
+AI Hub capabilities within that same product surface.
+
+## Upstream AI Hub installer slice — 2026-10-24
+
+The clean `odh-dashboard` upstream worktree now has the first implementation
+slice for the AI Hub MCP catalog path. The existing catalog detail action is
+being changed from a generic deployment modal to an explicit “Install MCP
+server” workflow.
+
+The slice reuses the upstream MCP catalog, MCP Lifecycle availability check,
+gateway readiness API, catalog-to-`MCPServer` conversion, deployment creation
+API, and project deployment polling. Its flow is prerequisite review, compact
+resource review, installation submission, and live status from the resulting
+deployment conditions. It does not use simulated timers or the retired custom
+Project Matrix UI.
+
+This is an upstream UI/integration slice, not completion of RHAISTRAT-2791. RHCL
+operator discovery, SubjectAccessReview preflight, guardrail policy
+provisioning, authenticated MCP initialize/tools/list/call verification, and
+uninstall remain explicit gates. The implementation must not describe those
+gates as complete until their real APIs and cluster conditions are wired and
+tested.
+
+## Upstream development against the live RHOAI environment — 2026-10-24
+
+The governing development process for Project Matrix is now upstream-first and
+live-cluster validated. The implementation source of truth is the clean
+`opendatahub-io/odh-dashboard` worktree and its upstream pull request; the
+provided RHOAI cluster is the integration and demonstration environment. A
+separate local Kubernetes environment is not required for the primary test
+loop.
+
+The official upstream development workflow has three distinct mechanisms:
+
+* `?devFeatureFlags` is a browser-session feature-flag switch. It is useful for
+  exposing a gated UI to one tester, but it does not deploy new source or
+  replace a container image.
+* `DEPLOYMENT_MODE=standalone` controls how a Dashboard module is built and
+  served during development. It is not a live-cluster image override.
+* The upstream Dashboard Module Controller can run from the source worktree
+  against the current kubeconfig. Its `RELATED_IMAGE_*` environment variables
+  override the images rendered into the managed Dashboard resources. For the
+  current Project Matrix slice, the relevant override is
+  `RELATED_IMAGE_ODH_MOD_ARCH_MODEL_REGISTRY_IMAGE`, pointing to the validated
+  pull-request image.
+
+The official references are `docs/dev-setup.md` for the development server,
+session feature flags, cluster access, and image builds;
+`docs/dashboard-operator.md` for running the controller against a cluster and
+using `RELATED_IMAGE_*` overrides; and `docs/module-federation.md` for the
+host/remote federation and service-proxy contract.
+
+The live cluster was inspected and establishes the required control boundary:
+`Dashboard/default-dashboard` is Managed and owned by
+`DataScienceCluster/default-dsc`; the production `dashboard-operator` runs in
+`redhat-ods-applications` and currently supplies the Red Hat model-registry
+image through its related-image environment. Direct Deployment or ConfigMap
+patches are therefore not a development mechanism: the active operator
+reconciles them back to the managed state.
+
+The repeatable Project Matrix live-test loop is consequently:
+
+1. Validate the source, tests, PR image, and current cluster health.
+2. Establish an explicit, reversible Dashboard-controller handoff.
+3. Run the upstream controller from the source worktree with the selected
+   `RELATED_IMAGE_*` override while preserving the production host image.
+4. Validate the real AI Hub flow against the live cluster.
+5. Stop the development controller, restore managed RHOAI reconciliation, and
+   verify Dashboard health and image restoration.
+
+The Production/Innovation distinction remains a product behavior, not a
+second shipped implementation: Production is the default and must fail closed
+when support gates are not satisfied; Innovation is an explicit evaluation
+lane in the same upstream workflow. A development image may be used only for
+the Innovation validation path and must never be represented as a supported
+Production release.
+
+Because controller handoff can affect the shared AI Hub Dashboard, it is a
+deliberate controlled mutation. The standing rule is to perform it when the
+user has explicitly requested the live-cluster development loop, but to first
+capture the current controller, image, Dashboard condition, and rollback state
+and to restore managed reconciliation before declaring the test complete. No
+additional cluster token or registry credential is required for this workflow;
+the remaining prerequisite is only the reversible ownership handoff.
+
+The pre-handoff snapshot was captured on 2026-10-24. The live baseline is
+healthy: `Dashboard/default-dashboard` is `Ready=True`,
+`ProvisioningSucceeded=True`, `Degraded=False`, and
+`DeploymentsAvailable=True`. `DataScienceCluster/default-dsc` has
+`spec.components.dashboard.managementState: Managed`; it owns both the
+Dashboard resource and the `dashboard-operator` Deployment in
+`redhat-ods-applications`. The managed controller is the RHOAI 3.5.0
+Dashboard operator, with the production host and model-registry image digests
+currently supplied through its related-image environment. These are the
+rollback anchors for the first live upstream test.
+
+## Gateway-layer component contract and demo handoff — 2026-11-06
+
+The Gateway horizontal is now being advanced as a layer-wide installation, not
+as an MCP-only click. The next component is **MaaS Gateway**, and its state is
+represented as an explicit validation gate until the governed model-response
+path has been exercised. The installer must not call the whole Gateway layer
+healthy merely because the MCP capability is available.
+
+The LayerDeployment status contract now carries per-component state for:
+
+* MCP Gateway;
+* MaaS Gateway;
+* identity and exposure; and
+* routing, quotas, and conformance.
+
+The same status response now carries the Gateway layer's demoable use cases:
+
+* authenticated MCP tool federation through `initialize`, `tools/list`, and an
+  approved non-destructive `tools/call`;
+* a governed model response through the MaaS Gateway; and
+* policy, exposure, and conformance troubleshooting using the generated
+  evidence.
+
+The AI Hub experience renders these states after the guided installation. MCP
+Gateway is marked healthy only when the executable path completes. MaaS and
+the remaining cross-cutting Gateway capabilities remain visibly marked as
+validation gates until their real checks pass. This keeps the user-facing
+workflow honest while giving the customer an immediate path to value and a
+clear next evaluation action.
+
+This preserves the Project Matrix rule that every horizontal installer ends in
+a usable evaluation, and that every future vertical/use-case installer must
+consume the same layer contract rather than inventing a parallel workflow.
+
+## AI Hub evaluator authorization gate — 2026-11-06
+
+The upstream AI Hub MCP installer performs a SubjectAccessReview for the
+browser identity before starting an MCP deployment. The live failure was
+reproduced and isolated: the browser user `JayDi11a` had namespace `view`
+access in `mcp-gateway-preview`, but lacked `create` on
+`mcpservers.mcp.x-k8s.io`. The dashboard service account had the platform
+read permissions; `kube:admin` CLI access was unrelated to the browser OAuth
+identity.
+
+The live cluster was corrected by binding the existing
+`project-matrix-gateway-installer-user` Role to `JayDi11a` only in the
+dedicated Gateway preview namespace. The resulting checks are positive for
+the required MCPServer lifecycle verbs, while operator and Gateway API reads
+remain delegated to the dashboard service account.
+
+The reusable implementation now ships the namespace-scoped Role and a
+platform-admin bootstrap script that accepts an explicit evaluator user or,
+preferably, an IdP-backed evaluator group. No customer identity is hard-coded
+in the product manifests. This is a one-time cluster/project entitlement, not
+an end-user installation step, and it preserves the no-cluster-admin user
+experience across arbitrary OpenShift AI clusters.
+
+## Live AI Hub status-flow refinement — 2026-11-06
+
+The upstream AI Hub slice was extended to make installation status durable and
+truthful. The installer modal now remains the authoritative view while the
+deployment is non-terminal; its close action and completion action stay
+disabled until the real MCP deployment and Gateway registration conditions
+resolve or fail. After the modal is closed, the deployment row exposes **View
+installation status**, and the status view can be reopened through a durable
+installation query parameter. This prevents a user from losing the status
+stream by navigating to the catalog or deployments view.
+
+The deployment status contract now distinguishes the cluster-local backend
+Service URL from the externally exposed Gateway endpoint. The former is
+copy-only and is not expected to open in a browser; the latter is the client
+endpoint when Gateway registration publishes one. The deployment is not
+reported as Available until the MCP server is ready and Gateway registration,
+when present, is Ready.
+
+The live RHOAI dashboard was rebuilt from the upstream worktree in RHOAI mode,
+published to the project Quay repository, and rolled out by immutable digest to
+the managed `rhods-dashboard` Deployment. Both dashboard replicas are healthy
+and the route responds. The rollout changed only the dashboard image and its
+least-privilege image-pull access; it did not modify OpenShift AI operators or
+shared Gateway resources.
+
+The next human validation is to open AI Hub, start or inspect the MCP
+installation, confirm that the status modal cannot be dismissed while active,
+close it only after a terminal state, then use the deployment row action to
+reopen the same live status. This is the current Project Matrix Gateway
+horizontal milestone; MaaS Gateway, authenticated MCP usability, identity and
+exposure, routing/quotas, and conformance remain subsequent layer gates.
+
+## Installation status truthfulness correction — 2026-11-06
+
+The first live status refinement still allowed a misleading state after a
+teardown/reinstall: a same-named prior deployment could be mistaken for the
+current run, and the user could be left with indefinite generic spinners. The
+upstream implementation now retains the object returned by the create request
+and matches polling results by its UID, with a creation-time fallback only when
+the cluster does not return a UID. Completion requires that current deployment
+to be observed with Ready=True and, when required, GatewayRegistration=True.
+
+While the run is active, Close and View installation status remain disabled.
+The modal now reports the current phase, elapsed time, selected lane, polling
+source, and a long-running explanation after 30 seconds. Gateway registration
+also reports its actual state instead of combining a pending icon with a
+completed-looking message.
+
+The corrected RHOAI image was rebuilt from the upstream worktree and rolled to
+the live managed dashboard at immutable digest
+`sha256:eb363d46da29ee35fb7c8ee4f5b61252bb1c6ccb76a639b0653612298339dcee`.
+Both dashboard replicas are healthy. Human validation must use a fresh browser
+session and a new install after deleting the prior test deployment; an already
+completed deployment cannot demonstrate the active-run state.
+
+## One-click workflow correction — 2026-11-08
+
+The active installer modal no longer exposes **View installation status**. That
+action was a workflow error: it allowed an unfinished one-click operation to
+hand the user to Deployments, where a partially reconciled resource could look
+complete. During installation, the modal is the only status surface and has no
+route-changing action. It remains open until the cluster reports success or a
+blocked condition. Durable status inspection is reserved for the completed
+deployment row and operational follow-up.
+
+The corrected RHOAI dashboard image was built and rolled to the live cluster at
+immutable digest
+`sha256:8bab3ade8366afff9accff95b2513e536e4e0757ecb1c9fb5dbb0e6339324cc8`.
+The managed dashboard is healthy with two available, updated replicas.
+
+## AI Hub click-path reduction and live remote rollout — 2026-11-08
+
+The MCP installer is served by the federated `model-registry-ui` module, not by
+the main dashboard image. The first dashboard-only rollout therefore could not
+change the installer visible in AI Hub. The module was rebuilt from the
+upstream worktree and rolled to the live `model-registry-ui` Deployment at
+immutable digest
+`sha256:bcce1af42ada1538aed71ca60bd0aa1dca251547a6fc645c25d867d65e1609e8`.
+
+The catalog flow now removes the redundant Review installation step. Production
+remains the default; when the cluster requires the Technology Preview Gateway,
+the evaluator explicitly enables Innovation and then starts the install from
+the same view. The active modal remains the authoritative status surface and
+does not provide a route-changing status button while work is in progress.
+
+The live remote rollout initially referenced a stale local digest and entered
+`ImagePullBackOff`; this was corrected to the canonical Quay manifest digest.
+The existing namespace-scoped Quay pull secret was refreshed and attached only
+to the module Deployment. The new replica is Ready. The remaining validation
+is browser confirmation of the reduced flow and a fresh teardown/reinstall.
+
+## Uninstaller cleanup verification — 2026-11-09
+
+The Gateway-layer uninstaller now waits for the cluster to confirm deletion,
+not merely acceptance of the delete request. It verifies that the owned
+MCPServer, registrations, routes, grants, RBAC, configuration, and
+operator-owned dependents are gone before returning success. Layer removal
+also waits for Project Matrix-owned Gateway resources to disappear while
+leaving shared platform services untouched.
+
+The active UI keeps the cleanup operation visible with an explicit
+**Waiting for cluster cleanup** state. A cleanup timeout returns a blocked
+result instead of reporting a false success. Focused repository and UI tests
+pass; the updated federated `model-registry-ui` is live on the evaluation
+cluster and healthy. The next validation is a fresh install followed by
+uninstall, confirming that the dialog remains active until the owned
+resources are actually gone.
+
+The live module was rebuilt for Linux/amd64 and rolled successfully after
+correcting the registry pull and host-architecture issues. The running pod
+observes the new Quay image at digest
+`sha256:4ebd80f882577f9cb8f51b7de155fdd77694446a265c4c81af7a3df2bae10948`.
+The image was built through the repository-supported
+`packages/model-registry/Dockerfile.workspace` path, which is now the
+reproducible build path for this live validation lane.

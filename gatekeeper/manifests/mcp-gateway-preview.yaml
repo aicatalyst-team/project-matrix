@@ -7,3 +7,26 @@ metadata:
     project-matrix.redhat.com/layer: gateway
     project-matrix.redhat.com/code-name: gatekeeper
     project-matrix.redhat.com/lane: preview
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: project-matrix-gateway-installer-user
+  namespace: mcp-gateway-preview
+  labels:
+    ai.redhat.com/managed-by: project-matrix
+    ai.redhat.com/layer: gateway
+rules:
+  # AI Hub performs a SubjectAccessReview for the browser user before the
+  # dashboard service account starts the ownership-scoped install. This is
+  # namespace-scoped and does not grant cluster or operator administration.
+  - apiGroups:
+      - mcp.x-k8s.io
+    resources:
+      - mcpservers
+    verbs:
+      - get
+      - list
+      - create
+      - patch
+      - delete

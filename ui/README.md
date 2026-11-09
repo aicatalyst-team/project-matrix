@@ -5,15 +5,19 @@ one-click deployment model. It follows the Open Data Hub / OpenShift AI
 module-federation shape used by the local OpenClaw extension, but it does not
 reuse OpenClaw's installer lifecycle.
 
-The Dashboard experience is **The Construct**. Official Red Hat AI: Agentic
-Strategy layer names remain primary; Matrix codenames provide the secondary
-journey vocabulary. See `../PROJECT_MATRIX_CONVENTION.md` for the canonical
-mapping.
+The user-facing destination is **Red Hat AI Stack**. Official Red Hat AI:
+Agentic Strategy layer names remain primary; Matrix codenames provide the
+secondary journey vocabulary. See `../PROJECT_MATRIX_CONVENTION.md` for the
+canonical mapping.
 
-The user-facing contract is intentionally one control:
+The landing page shows the horizontal layers in architectural order. Each
+available layer owns one guided install action and one truthful status stream.
+The current first deliverable is Gateway / Gatekeeper. Its installer has one
+primary action; the lane switch only selects the mode and does not submit until
+the user presses that action:
 
 ```text
-Preview capabilities: OFF | ON
+Use Innovation lane: OFF | ON
 ```
 
 The control maps to the two supported Gatekeeper Gateway profiles:
@@ -136,6 +140,7 @@ the `LayerDeployment` does not exist yet, the page should show the initial
 
 For the actual OpenShift AI Dashboard experience, install the package into the
 ODH Dashboard workspace and use the module's federated route. The menu entry
-will be **Agentic Platform → Red Hat AI: Agentic Strategy** and the page will
-render as **Project Matrix · The Construct**.
+will be **AI Stack → Red Hat AI Stack** and the page will render the Gateway
+layer first. Project Matrix and The Construct remain internal implementation
+codename vocabulary.
 
