@@ -2898,3 +2898,29 @@ completion state, continue to Deployments, and verify the **New install**
 marker. This is a UI acceptance gate, not a claim that the Gateway layer's
 remaining MaaS, authenticated usability, identity/exposure, routing, and
 conformance gates are complete.
+
+## Gateway registration pending-state correction — 2026-11-09
+
+The live installer previously classified the transient Gateway condition
+`mcp server is not present in gateway yet` as blocked. That was misleading:
+the MCP server was healthy and the registration object was still converging.
+The dashboard now treats the known pending registration reasons/messages as
+**Registering with Gateway** with an active spinner. Explicit forbidden or
+other terminal failures remain failures with their actual cause.
+
+The fix also suppresses stale deployment-status copy while the active
+installation is authoritative. Source commit `3bd164dc1` is pushed to the
+upstream-first branch:
+<https://github.com/JayDi11a/odh-dashboard/tree/project-matrix-upstream>.
+The corrected federated module is live on the evaluation cluster and Ready at
+image digest
+`sha256:691d528abad6e98301fd7e82e6c337a3d143b9b7a7a30659998c14cfbdab8b43`.
+
+Automated TypeScript, focused Jest, ESLint, and diff checks pass. The next
+acceptance gate is one fresh browser teardown/reinstall cycle: observe the
+registration-pending state without a false failure, refresh during the active
+install, wait for explicit completion, continue to Deployments, and verify the
+new-install marker. Completion of that cycle makes the MCP-first Gateway
+installer milestone shareable; it does not complete the remaining Gateway-layer
+MaaS, inference, identity/exposure, authenticated usability, routing/quotas,
+conformance, and demo-use-case work.

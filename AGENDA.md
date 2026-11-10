@@ -464,9 +464,14 @@ resource or platform condition when it cannot.
 - [x] Correct Gateway registration state messaging.
 - [x] Rebuild and roll the corrected immutable RHOAI image to the live
   dashboard; both replicas are healthy.
-- [ ] Fresh-browser human test: delete the test deployment, reinstall, confirm
-  the modal cannot be skipped, and confirm the durable status view only opens
-  after completion or failure.
+- [x] Keep transient `mcp server is not present in gateway yet` registration
+  state pending with an animated status instead of falsely blocking the
+  install; preserve explicit forbidden/terminal failures.
+- [x] Push source commit `3bd164dc1` and roll the corrected module image to
+  the live evaluation cluster.
+- [ ] Fresh-browser human acceptance: teardown, reinstall, observe pending
+  registration, refresh in-flight, wait for explicit completion, continue to
+  Deployments, and verify the **New install** marker.
 
 ## Live upstream development loop — 2026-10-24
 
