@@ -2861,3 +2861,40 @@ observes the new Quay image at digest
 The image was built through the repository-supported
 `packages/model-registry/Dockerfile.workspace` path, which is now the
 reproducible build path for this live validation lane.
+
+## Install handoff and refresh-resilient status — 2026-11-09
+
+The AI Hub MCP installer now treats the active installation as a durable,
+cluster-backed operation. A browser refresh restores the selected project,
+lane, deployment identity, start time, current phase, and elapsed time from a
+short-lived browser session record; the cluster remains authoritative. A
+same-named stale deployment cannot satisfy the new run: polling matches the
+created resource by UID, with a creation-time fallback only when the API does
+not return a UID.
+
+The modal does not expose a route-changing status action while installation is
+active. It remains the authoritative surface until the MCP deployment is
+Ready and the required Gateway registration is Ready. It reports concise
+phase, project, lane, elapsed-time, and blocking details, and treats unknown
+or forbidden readiness as non-terminal rather than as success.
+
+When all required conditions pass, the modal explicitly says the installation
+is complete and offers **Continue to deployments**. That handoff clears the
+active session and deep-links to the newly created deployment. The deployment
+row carries a **New install** label so the just-completed installation is
+visually distinct from older deployments.
+
+The federated `model-registry-ui` module was rebuilt and rolled to the live
+OpenShift AI evaluation cluster. The running pod is healthy and serves the
+Quay image at immutable digest
+`sha256:ff266a1f76b70a3294c656e8ebdfad28c8a40a9d7970622d78e1c3f21a73e982`.
+The source milestone is pushed to the upstream-first branch at commit
+`320e0cfe9`. TypeScript, ESLint, focused Jest tests, and diff validation pass;
+the focused suites now cover 20 tests.
+
+The remaining acceptance action is human browser validation: perform a fresh
+teardown/reinstall, refresh during an active install, wait for the explicit
+completion state, continue to Deployments, and verify the **New install**
+marker. This is a UI acceptance gate, not a claim that the Gateway layer's
+remaining MaaS, authenticated usability, identity/exposure, routing, and
+conformance gates are complete.

@@ -138,44 +138,49 @@ immutable evaluation images.
 - [x] Add the Gateway component-status contract for MCP Gateway, MaaS Gateway, identity/exposure, and routing/quota/conformance.
 - [x] Add the Gateway post-install demo-use-case contract and AI Hub rendering for authenticated MCP federation, governed MaaS response, and troubleshooting evidence.
 - [x] Add the portable namespace-scoped evaluator RBAC bootstrap required by the AI Hub SubjectAccessReview; verify the live evaluator can create MCPServer resources without cluster-admin.
+- [x] Make the AI Hub installer refresh-resilient and cluster-truthful; keep the active modal authoritative, require terminal readiness before handoff, and mark the completed deployment as `New install`.
 - [ ] Implement the MaaS Gateway validation/execution adapter and promote its demo from Validation gate to Healthy only after real governed model-response evidence passes.
 - [ ] Triage the combined Dashboard host dependency audit findings before calling the host release production-grade.
 - [ ] Add the next horizontal layer adapter after Gatekeeper contracts are accepted.
 
 ## Current next actions
 
-1. Complete the remaining production-shaped Dashboard release review: triage
+1. Perform the fresh browser acceptance for the live AI Hub installer: teardown
+   the test deployment, reinstall, refresh during the active run, verify the
+   modal resumes the same phase and elapsed time, wait for explicit completion,
+   use **Continue to deployments**, and confirm the **New install** marker.
+2. Complete the remaining production-shaped Dashboard release review: triage
    the combined host dependency audit and decide whether the evaluated host
    becomes the supported OpenShift AI Dashboard build input. The isolated host,
    its dedicated OAuth front door, and the repeatable opt-in teardown/reinstall
    path are now live and validated for the prior evaluation host; the renamed
    Matrix host build is being rebuilt with the bounded release context.
-2. Verify the optimized image release path: record the new combined-host
+3. Verify the optimized image release path: record the new combined-host
    digest, deploy it only to the isolated evaluation copy, and confirm that
    the customer instructions contain no build, source-upload, or local-runtime
    step. See [`deploy/RELEASE_PERFORMANCE.md`](deploy/RELEASE_PERFORMANCE.md).
-3. Treat the current OpenShift AI baseline as independently usable when it
+4. Treat the current OpenShift AI baseline as independently usable when it
    satisfies the compatibility contract; do not approve the pending manual
    InstallPlan from Gatekeeper. Use `upgrade-postcheck` only after a
    platform-owned upgrade.
-3. Keep Mesh 2 removal out of Project Matrix’s critical path; the migration is
+5. Keep Mesh 2 removal out of Project Matrix’s critical path; the migration is
    complete and the ingress operator is now green.
-4. Use the release contract: the live Red Hat package is `mcp-gateway.v0.7.1`
+6. Use the release contract: the live Red Hat package is `mcp-gateway.v0.7.1`
    on `preview`, while the sole preview lane is pinned upstream `v1.0.2`
    (`e48ae51c`). The invalid duplicate namespace-scoped RHCL installation has
    been removed and the global RHCL installation remains healthy. The only
    remaining platform-owner action is to publish an approved RHCL 1.5+ OLM/
    catalog path. Then run the isolated preview installer; do not substitute an
    upstream image into the live OLM path.
-5. Qualify the RHCL-documented OIDC path and the explicit `mcps` authorization
+7. Qualify the RHCL-documented OIDC path and the explicit `mcps` authorization
    policy. The OpenShift TokenReview path is proven for evaluation, but it is
    not by itself evidence of the documented RHCL customer-identity path.
-6. Promote the tested evaluation images to canonical Quay or an approved
+8. Promote the tested evaluation images to canonical Quay or an approved
    immutable mirror without changing the one-package/two-lane contract.
-7. Obtain RHCL 1.5+ for the isolated upstream Innovation lane and qualify the
+9. Obtain RHCL 1.5+ for the isolated upstream Innovation lane and qualify the
    actual upstream install; Production remains fail-closed until a supported
    Gateway channel or approved exception exists.
-8. Begin the next horizontal adapter only after the Gateway click is proven
+10. Begin the next horizontal adapter only after the Gateway click is proven
    and the host-integrated release is accepted.
 
 ## Lean platform quality gate
