@@ -473,6 +473,21 @@ resource or platform condition when it cannot.
   registration, refresh in-flight, wait for explicit completion, continue to
   Deployments, and verify the **New install** marker.
 
+### 2026-11-10 live recovery milestone
+
+- [x] Rebuild the federated BFF for Linux/amd64 after the live image exposed a
+  workstation-architecture `Exec format error`.
+- [x] Add a bounded recovery window and explicit **Cancel installation** cleanup
+  path for blocked or stalled MCP installs.
+- [x] Keep the active modal authoritative until verified success; block close
+  and deployment navigation for incomplete installs.
+- [x] Roll and verify the healthy live dashboard image at digest
+  `sha256:9a3d5c6aec954907bc75ded492715203831afce6b7a44b3940eef22f3f4bf4c6`.
+- [x] Push upstream commit `94fe5098b` to the shareable
+  `project-matrix-upstream` branch.
+- [ ] Perform the fresh-browser teardown/reinstall acceptance with timeout or
+  cancellation coverage, then complete a healthy install through Deployments.
+
 ## Live upstream development loop — 2026-10-24
 
 - [x] Confirm the official upstream development path: run the Dashboard Module

@@ -2924,3 +2924,35 @@ new-install marker. Completion of that cycle makes the MCP-first Gateway
 installer milestone shareable; it does not complete the remaining Gateway-layer
 MaaS, inference, identity/exposure, authenticated usability, routing/quotas,
 conformance, and demo-use-case work.
+
+## Bounded install recovery and live BFF correction — 2026-11-10
+
+The live installer exposed two operational defects during validation. First,
+the dashboard BFF image was built for the local workstation architecture and
+failed in the cluster with `Exec format error`; the BFF was rebuilt explicitly
+for Linux/amd64. Second, a Gateway registration that never converges could
+leave the user waiting indefinitely without a cleanup path.
+
+The installer now provides a bounded ten-minute recovery window, preserves
+the live phase and elapsed time, keeps the active modal authoritative, and
+offers **Cancel installation** when the cluster is blocked or exceeds that
+window. Cancellation deletes only the Project Matrix-owned MCP deployment and
+then reports cancellation; shared operators and Gateway resources are left
+untouched. A blocked install cannot be dismissed through the modal close
+control, and only a verified successful install can continue to Deployments.
+
+The corrected federated dashboard is healthy on the live evaluation cluster
+with one ready replica and zero restarts. Its immutable image digest is
+`sha256:9a3d5c6aec954907bc75ded492715203831afce6b7a44b3940eef22f3f4bf4c6`.
+The upstream source commit is `94fe5098b`, pushed to the shareable branch:
+<https://github.com/JayDi11a/odh-dashboard/tree/project-matrix-upstream>.
+TypeScript, ESLint, production frontend build, focused Jest tests (39 tests),
+Go build, and diff validation pass.
+
+The next human acceptance action remains a fresh browser teardown/reinstall:
+verify the registration-pending phase, refresh in flight, confirm that the
+modal remains authoritative, exercise timeout/cancellation if registration is
+unavailable, then complete a healthy run and intentionally continue to
+Deployments. This closes the MCP-first installer UX gate; the broader Gateway
+layer still requires MaaS, inference, identity/exposure, authenticated
+usability, routing/quotas, conformance, and demo-use-case gates.
