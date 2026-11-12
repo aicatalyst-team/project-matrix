@@ -2982,3 +2982,8 @@ The RHCL/Kuadrant controller's current OOM/restart condition is recorded as a
 separate platform-health gate, not an RBAC failure. A fresh teardown/reinstall
 with healthy RHCL reconciliation remains required before the Gateway-layer
 milestone can be called shareable.
+
+The RBAC implementation is pushed as upstream commit `a862a6e38` on the
+shareable `project-matrix-upstream` branch. The live dashboard is running the
+corresponding Quay image at digest
+`sha256:f89d49a3df99bcd97f2a46c850313a2c4bfeb10ac8c411e692ddf1c7f818fcbe`.
