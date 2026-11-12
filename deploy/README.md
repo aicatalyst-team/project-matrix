@@ -108,6 +108,25 @@ This grants only `get`, `list`, `create`, `patch`, and `delete` on
 operator, Gateway API, or platform-upgrade permissions. The installer remains
 portable because the namespace and identity are explicit deployment inputs.
 
+### Dashboard service-account RBAC contract
+
+The dashboard BFF performs the mutation through its internal service account,
+`odh-dashboard-model-registry`, in the dashboard host namespace. Bind the
+Project Matrix Gateway installer ClusterRole to that service account using
+`manifests/modules/model-registry/project-matrix-gateway-installer-rbac.yaml`.
+The BFF runs a SubjectAccessReview preflight before creating anything. The
+preflight covers the MCPServer create path, Gateway registration resources,
+operator prerequisites, live status reads, and the owned-resource cleanup
+path, including Pods, Deployments, and ReplicaSets. A missing permission fails
+before mutation with the exact resource and scope that must be granted.
+
+The browser user and the dashboard mutator are separate identities: the
+browser user receives only the namespace-scoped MCPServer Role above, while
+the dashboard service account receives the reviewed cluster-wide read/write
+permissions required to orchestrate the layer. No evaluator identity is
+hard-coded in the shipped package, and shared platform operators are checked
+but never installed or upgraded by the installer.
+
 ## Verify
 
 Run the read-only baseline check before any installation attempt:

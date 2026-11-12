@@ -2956,3 +2956,29 @@ unavailable, then complete a healthy run and intentionally continue to
 Deployments. This closes the MCP-first installer UX gate; the broader Gateway
 layer still requires MaaS, inference, identity/exposure, authenticated
 usability, routing/quotas, conformance, and demo-use-case gates.
+
+## RBAC as a release gate — 2026-11-11
+
+RBAC is now treated as an explicit Project Matrix acceptance gate. The browser
+evaluator and the dashboard mutator are separate identities: the evaluator is
+authorized only for namespace-scoped `MCPServer` mutation, while the BFF uses
+the `odh-dashboard-model-registry` service account to orchestrate the owned
+Gateway-layer resources.
+
+The upstream BFF now runs a fail-closed SubjectAccessReview preflight before
+mutation. It checks the complete install, live-status, rollback, and
+uninstall contract: MCPServer resources, Gateway registration resources,
+operator prerequisites, and the owned-resource inventory required to verify
+cleanup, including Pods, Deployments, and ReplicaSets. Missing access reports
+the exact verb, resource, and scope instead of allowing a partial install.
+
+The live dashboard service account has the reviewed least-privilege contract,
+and its effective permissions were verified on the evaluation cluster on
+2026-11-11. The live evaluator remains namespace-scoped and does not require
+cluster-admin. The stale duplicate upstream MCP Lifecycle controller was
+removed earlier; the platform-managed controller remains healthy.
+
+The RHCL/Kuadrant controller's current OOM/restart condition is recorded as a
+separate platform-health gate, not an RBAC failure. A fresh teardown/reinstall
+with healthy RHCL reconciliation remains required before the Gateway-layer
+milestone can be called shareable.

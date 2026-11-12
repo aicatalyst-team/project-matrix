@@ -431,7 +431,11 @@ resource or platform condition when it cannot.
 - [x] Poll the real project deployment and render its cluster conditions during
   installation.
 - [ ] Add RHCL discovery and supported-version reporting.
-- [ ] Add SubjectAccessReview/RBAC preflight with actionable failure details.
+- [x] Add SubjectAccessReview/RBAC preflight with actionable failure details.
+  The upstream dashboard now verifies the mutator service account's install,
+  status, rollback, and uninstall permissions before mutation; live effective
+  permissions were verified on 2026-11-11. The evaluator remains
+  namespace-scoped.
 - [ ] Add mandatory guardrail policy validation and provisioning.
 - [ ] Add authenticated MCP initialize, tools/list, and tools/call checks.
 - [ ] Add uninstall and post-install lifecycle handling.
