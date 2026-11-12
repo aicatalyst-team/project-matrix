@@ -2987,3 +2987,25 @@ The RBAC implementation is pushed as upstream commit `a862a6e38` on the
 shareable `project-matrix-upstream` branch. The live dashboard is running the
 corresponding Quay image at digest
 `sha256:f89d49a3df99bcd97f2a46c850313a2c4bfeb10ac8c411e692ddf1c7f818fcbe`.
+
+## RHCL controller platform-health remediation — 2026-11-11
+
+The remaining live Gateway convergence blocker was isolated to the shared
+RHCL/Kuadrant operator, not Project Matrix RBAC. The OLM-managed
+`openshift-operators/kuadrant-operator-controller-manager` was repeatedly
+OOM-killed at its packaged `200Mi` request / `300Mi` limit, so MCP Gateway
+registration could not converge.
+
+The live evaluation cluster was remediated at the OLM CSV template to a
+`512Mi` request / `1Gi` limit. The RHCL CSV now reports `Succeeded`, the
+controller has one ready replica with zero restarts, the Gateway is
+`Programmed=True`, the MCP Gateway extension is `Ready=True`, and the existing
+MCP registrations are `Ready=True`. The stale failed pod from the old crash
+loop was removed.
+
+This is platform-health evidence, not an installer mutation. Project Matrix
+must not silently resize, install, or upgrade a Red Hat-managed operator on an
+arbitrary cluster. The portable contract is to preflight RHCL availability,
+fail with the actual operator condition when it is not ready, and require the
+cluster administrator to remediate the shared platform dependency. A fresh
+teardown/reinstall remains the final live MCP-first acceptance action.

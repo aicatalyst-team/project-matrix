@@ -102,6 +102,7 @@ immutable evaluation images.
 - [x] Make the Production protocol validator fail closed on every non-401 unauthenticated MCP response, including AuthPolicy/data-plane HTTP 500 compatibility failures.
 - [x] Inspect the live OLM package manifest; the target exposes only `mcp-gateway/preview`, with no supported channel available to select.
 - [x] Add an explicit, version/channel-matched, expiring Production support-exception gate; Preview remains distinct from an exception.
+- [x] Restore RHCL/Kuadrant controller availability on the live evaluation cluster after confirming an OOM crash loop; the OLM CSV now carries a 512Mi request / 1Gi limit. Project Matrix does not mutate this shared operator on arbitrary clusters; it requires RHCL readiness and reports the platform remediation when that prerequisite is not met.
 - [x] Add the internal `mcps` listener requirement for authenticated `tools/call` authorization and verify it shares the public listener port.
 - [x] Server-side dry-run the rendered AuthPolicy against the live API; schema/admission compatibility passes without applying the policy.
 - [ ] Obtain an actual supported Gateway channel/release or an approved exception artifact; Project Matrix must not invent either.
